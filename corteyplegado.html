@@ -1,0 +1,2412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corte y Plegado CNC - AVUI</title>
+
+  <style>
+    /* =====================================================
+       RESET BÁSICO
+    ===================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      color: #ffffff;
+      background: #000000;
+    }
+
+    /* =====================================================
+       UTILIDADES GENERALES
+    ===================================================== */
+    .page-wrapper {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(25px);
+      animation: fadeUp 0.8s ease-out forwards;
+    }
+
+    .delay-1  { animation-delay: 0.2s; }
+    .delay-2  { animation-delay: 0.4s; }
+    .delay-3  { animation-delay: 0.6s; }
+    .delay-4  { animation-delay: 0.8s; }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+   /* =====================================================
+   BOTÓN GLOBAL "CONTACTAR AHORA"
+===================================================== */
+.corte-cnc-btn {
+  display: inline-block;
+  text-transform: uppercase;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 14px 38px;
+  margin-top: 45px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255,255,255,0.25);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s ease;
+}
+
+/* Quitar subrayado en TODOS los estados del enlace */
+.corte-cnc-btn,
+.corte-cnc-btn:link,
+.corte-cnc-btn:visited,
+.corte-cnc-btn:hover,
+.corte-cnc-btn:focus,
+.corte-cnc-btn:active {
+  text-decoration: none !important;
+}
+
+/* Versión blanca translúcida con textura */
+.corte-cnc-btn.white-textured {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  position: relative;
+  backdrop-filter: blur(4px);
+}
+
+/* Textura ruido / pixelado */
+.corte-cnc-btn.white-textured::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQI12NgYGAAAAAEAAHiIbwzAAAAAElFTkSuQmCC");
+  background-size: 4px 4px;
+  opacity: 0.25;
+  mix-blend-mode: overlay;
+}
+
+/* Brillo diagonal */
+.corte-cnc-btn.white-textured::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-25deg);
+  transition: all 0.6s ease;
+  opacity: 0;
+}
+
+.corte-cnc-btn.white-textured:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+.corte-cnc-btn.white-textured:hover::before {
+  left: 100%;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .corte-cnc-btn {
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+    padding: 14px 0;
+  }
+}
+
+    /* Brillo diagonal */
+    .corte-cnc-btn.white-textured::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -80%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: skewX(-25deg);
+      transition: all 0.6s ease;
+      opacity: 0;
+    }
+
+    .corte-cnc-btn.white-textured:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 8px 28px rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+    }
+
+    .corte-cnc-btn.white-textured:hover::before {
+      left: 100%;
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .corte-cnc-btn {
+        width: 100%;
+        text-align: center;
+        margin-top: 30px;
+        padding: 14px 0;
+      }
+    }
+
+    /* =====================================================
+       HERO - CORTE Y PLEGADO CNC
+    ===================================================== */
+    .hero-cnc {
+      position: relative;
+      width: 100%;
+      min-height: 90vh;
+      background-image: url("https://avui.cl/wp-content/uploads/2025/11/envato-labs-image-edit-29.webp");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .hero-cnc::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(0,0,0,0.80) 0%,
+        rgba(0,0,0,0.55) 40%,
+        rgba(0,0,0,0.35) 100%
+      );
+      z-index: 0;
+    }
+
+    .hero-cnc-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1400px;
+      padding: 120px 6% 120px;
+    }
+
+    .hero-text-block {
+      max-width: 720px;
+    }
+
+    .hero-title {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 3.1rem;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 22px;
+    }
+
+    .hero-paragraph {
+      font-size: 1rem;
+      line-height: 1.8;
+      max-width: 650px;
+      color: #e2e2e2;
+    }
+
+    @media (max-width: 1024px) {
+      .hero-cnc {
+        min-height: 80vh;
+      }
+      .hero-title {
+        font-size: 2.4rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-cnc {
+        align-items: flex-end;
+      }
+
+      .hero-cnc-inner {
+        padding: 90px 7% 80px;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+        text-align: left;
+      }
+
+      .hero-subtitle,
+      .hero-paragraph {
+        font-size: 0.95rem;
+        text-align: left;
+      }
+    }
+
+    /* =====================================================
+       SECCIÓN 1 - INTRO CORTE CNC
+    ===================================================== */
+    .intro-corte-cnc {
+      background: #000000;
+      color: #ffffff;
+      padding: 90px 6%;
+      box-sizing: border-box;
+    }
+
+    .intro-corte-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .intro-corte-text {
+      max-width: 600px;
+    }
+
+    .intro-kicker {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #aaaaaa;
+      margin-bottom: 18px;
+    }
+
+    .intro-title {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .intro-paragraph {
+      font-size: 0.98rem;
+      line-height: 1.8;
+      color: #d8d8d8;
+      max-width: 520px;
+    }
+
+    .intro-image {
+      position: relative;
+    }
+
+    .intro-image-inner {
+      overflow: hidden;
+      border-radius: 0;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .intro-image-inner img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      transition: transform 0.9s ease;
+      filter: brightness(0.92) contrast(1.05);
+    }
+
+    .intro-image-inner:hover img {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 1024px) {
+      .intro-corte-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .intro-corte-text {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .intro-corte-cnc {
+        padding: 70px 6%;
+      }
+      .intro-title {
+        font-size: 2rem;
+      }
+      .intro-paragraph {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* =====================================================
+   COMPLEMENTO SECCIÓN 1 + SECCIONES 2-6
+   (código original unificado)
+===================================================== */
+
+/* === COMPLEMENTO SECCIÓN 1 === */
+.corte-cnc-section {
+  background: #000;
+  padding: 70px 6%;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.corte-cnc-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  color: #f5f5f5;
+}
+
+.corte-cnc-h3,
+.corte-cnc-h4,
+.corte-cnc-h5 {
+  font-family: Helvetica, Arial, sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.corte-cnc-desc,
+.corte-cnc-list li {
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+}
+
+.corte-cnc-header {
+  margin-bottom: 50px;
+  position: relative;
+  padding-left: 18px;
+}
+
+.corte-cnc-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 4px;
+  height: 40px;
+  background: #ffffff;
+  opacity: 0.9;
+}
+
+.corte-cnc-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.corte-cnc-header-text {
+  flex: 1 1 60%;
+}
+
+.corte-cnc-header-image {
+  flex: 1 1 35%;
+  text-align: right;
+}
+
+/* ===============================
+   🔥 CORRECCIÓN IMPORTANTE AQUÍ
+   — Imagen usa todo el ancho de la columna
+   — No se deforma, no se recorta
+   — Se mantiene proporcional
+================================ */
+.corte-cnc-header-image img {
+  width: 100%;            /* llena la columna */
+  max-width: none;        /* elimina el límite de 420px */
+  height: auto;           /* mantiene proporción */
+  object-fit: contain;    /* no recorta ni estira */
+  border: 1px solid rgba(255,255,255,0.2);
+  background: #111;
+}
+
+.corte-cnc-h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0 0 15px;
+}
+
+.corte-cnc-desc {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #d9d9d9;
+  margin: 0;
+}
+
+.corte-cnc-flex {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.corte-cnc-box {
+  flex: 1 1 calc(50% - 25px);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 28px 26px 26px;
+  background: rgba(15,15,15,0.95);
+  transition: all 0.35s ease-out;
+  overflow: hidden;
+  position: relative;
+}
+
+.corte-cnc-h4,
+.corte-cnc-h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin: 0;
+  color: #ffffff;
+}
+
+.corte-cnc-content {
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.35s ease-out;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.corte-cnc-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.corte-cnc-list li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #cfcfcf;
+}
+
+.corte-cnc-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 7px;
+  height: 1px;
+  background: #ffffff;
+  opacity: 0.7;
+}
+
+.corte-cnc-list strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.corte-cnc-flex:hover .corte-cnc-box {
+  background: rgba(35,35,35,0.97);
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.corte-cnc-flex:hover .corte-cnc-content {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 15px;
+}
+
+@media (max-width: 900px) {
+  .corte-cnc-header-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+  .corte-cnc-header-image img {
+    max-width: 100%;
+  }
+  .corte-cnc-flex {
+    flex-direction: column;
+  }
+  .corte-cnc-box {
+    flex: 1 1 100%;
+    padding: 22px 20px;
+  }
+  .corte-cnc-h3 {
+    font-size: 1.6rem;
+  }
+  .corte-cnc-desc {
+    font-size: 0.95rem;
+  }
+}
+
+/* === SECCIÓN 2 - PLEGADO CNC === */
+.plegado-cnc-section {
+  background: #ffffff;
+  padding: 80px 6%;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.plegado-cnc-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  color: #222;
+}
+
+.plegado-cnc-h3,
+.plegado-cnc-h4,
+.plegado-cnc-h5 {
+  font-family: Helvetica, Arial, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.plegado-cnc-desc,
+.plegado-cnc-list li {
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+}
+
+.plegado-cnc-header-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 60px;
+  flex-wrap: wrap;
+}
+
+.plegado-cnc-header {
+  position: relative;
+  padding-left: 18px;
+  flex: 1 1 55%;
+}
+
+.plegado-cnc-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 4px;
+  height: 40px;
+  background: #777;
+  opacity: 0.9;
+}
+
+.plegado-cnc-h3 {
+  font-size: 2.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+  color: #111;
+}
+
+.plegado-cnc-desc {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #333;
+  margin: 0;
+}
+
+.plegado-cnc-image {
+  flex: 1 1 40%;
+  text-align: right;
+}
+
+/* ======================================================
+   🔥 CORRECCIÓN APLICADA (MISMA QUE LA SECCIÓN 1)
+   - Ocupa todo el ancho real de la columna
+   - No se deforma
+   - No se recorta
+   - Visual limpio y proporcional
+====================================================== */
+.plegado-cnc-image img {
+  width: 100%;            /* llena toda su columna */
+  height: auto;           /* mantiene la proporción */
+  max-width: none;        /* elimina límite previo de 480px */
+  object-fit: contain;    /* evita recortes o deformaciones */
+  display: block;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+}
+
+.plegado-cnc-flex {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.plegado-cnc-box {
+  flex: 1 1 calc(50% - 25px);
+  border: 1px solid #ccc;
+  padding: 28px 26px 26px;
+  background: #f9f9f9;
+  transition: all 0.35s ease-out;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.plegado-cnc-h4,
+.plegado-cnc-h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin: 0;
+  color: #555;
+}
+
+.plegado-cnc-content {
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.35s ease-out;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.plegado-cnc-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.plegado-cnc-list li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.plegado-cnc-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 7px;
+  height: 1px;
+  background: #777;
+  opacity: 0.7;
+}
+
+.plegado-cnc-list strong {
+  color: #000;
+  font-weight: 600;
+}
+
+.plegado-cnc-flex:hover .plegado-cnc-box {
+  background: #f2f2f2;
+  border-color: #aaa;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.plegado-cnc-flex:hover .plegado-cnc-content {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 15px;
+}
+
+@media (max-width: 900px) {
+  .plegado-cnc-header-wrap {
+    flex-direction: column;
+  }
+  .plegado-cnc-image {
+    text-align: center;
+    margin-top: 25px;
+  }
+  .plegado-cnc-image img {
+    max-width: 100%;
+  }
+  .plegado-cnc-flex {
+    flex-direction: column;
+  }
+  .plegado-cnc-box {
+    flex: 1 1 100%;
+    padding: 22px 20px;
+  }
+  .plegado-cnc-h3 {
+    font-size: 1.6rem;
+  }
+  .plegado-cnc-desc {
+    font-size: 0.95rem;
+  }
+}
+
+    /* === SECCIÓN 3 - MATERIALES === */
+    .materiales-cnc-section {
+      background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+      padding: 90px 6%;
+      color: #1e1e1e;
+      overflow: hidden;
+    }
+
+    .materiales-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .materiales-cnc-h3 {
+      font-family: "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #0e0e0e;
+    }
+
+    .materiales-cnc-desc {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      max-width: 700px;
+      margin-top: 15px;
+      color: #444;
+    }
+
+    .materiales-cnc-image {
+      margin: 50px 0;
+      overflow: hidden;
+      border-radius: 14px;
+      position: relative;
+    }
+
+    .materiales-cnc-image img {
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      object-fit: cover;
+      transition: transform 0.8s ease;
+      filter: brightness(1.05) contrast(1.02);
+    }
+
+    .materiales-cnc-image:hover img {
+      transform: scale(1.03);
+    }
+
+    .materiales-cnc-icons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .material-card {
+      position: relative;
+      text-align: center;
+      padding: 35px 25px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(200, 200, 200, 0.3);
+      box-shadow: inset 0 1px 10px rgba(255, 255, 255, 0.3),
+                  0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.5s ease;
+      overflow: hidden;
+    }
+
+    .material-card::before {
+      content: "";
+      position: absolute;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2), transparent 60%);
+      transform: rotate(25deg);
+      transition: opacity 0.6s ease;
+      opacity: 0;
+    }
+
+    .material-card:hover::before {
+      opacity: 1;
+      animation: liquidMove 2s infinite linear;
+    }
+
+    @keyframes liquidMove {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .material-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .material-icon img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.6s ease;
+    }
+
+    .material-card:hover img {
+      transform: scale(1.15);
+    }
+
+    .material-card p {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      margin-top: 12px;
+    }
+
+    .materiales-cnc-rangos {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 14px;
+      padding: 40px 50px;
+      margin-top: 70px;
+      border: 1px solid rgba(220,220,220,0.5);
+    }
+
+    .materiales-cnc-h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 15px;
+    }
+
+    .materiales-cnc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+
+    .materiales-cnc-list li {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .materiales-cnc-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 6px;
+      height: 6px;
+      background: #777;
+      border-radius: 50%;
+    }
+
+    .materiales-cnc-foot {
+      color: #444;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .materiales-cnc-h3 { font-size: 1.6rem; }
+      .materiales-cnc-desc { font-size: 1rem; }
+      .materiales-cnc-rangos { padding: 30px; }
+    }
+
+    /* === SECCIÓN 4 - APLICACIONES === */
+    .aplicaciones-cnc-section {
+      background: #000000;
+      padding: 90px 6%;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .aplicaciones-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #f5f5f5;
+    }
+
+    .aplicaciones-h3,
+    .aplicaciones-h4,
+    .aplicaciones-h5 {
+      font-family: "Helvetica Neue", sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    .aplicaciones-header {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 50px;
+      align-items: center;
+      margin-bottom: 80px;
+    }
+
+    .aplicaciones-header-content {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .aplicaciones-header-content::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 50px;
+      background: linear-gradient(to bottom, #ffffff, rgba(255,255,255,0.3));
+    }
+
+    .aplicaciones-h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 20px 0;
+      line-height: 1.3;
+      color: #ffffff;
+    }
+
+    .aplicaciones-desc {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #d0d0d0;
+      margin: 0;
+      max-width: 500px;
+    }
+
+    .aplicaciones-panorama {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0px;
+      height: 280px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    }
+
+    .aplicaciones-panorama img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .aplicaciones-panorama:hover img {
+      transform: scale(1.05);
+    }
+
+    .panorama-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 100%);
+      pointer-events: none;
+    }
+
+    .aplicaciones-content {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .aplicaciones-usos {
+      position: sticky;
+      top: 100px;
+    }
+
+    .aplicaciones-h4,
+    .aplicaciones-h5 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0 0 30px 0;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+    }
+
+    .usos-lista {
+      display: flex !important;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .uso-item {
+      display: flex !important;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border-left: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 0px;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+
+    .uso-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-left-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      transform: translateX(8px);
+    }
+
+    .uso-icon {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 700;
+      min-width: 20px;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .uso-item:hover .uso-icon {
+      opacity: 1;
+      color: #ffffff;
+      transform: scale(1.2);
+    }
+
+    .uso-item p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .uso-item:hover p {
+      color: #ffffff;
+    }
+
+    .aplicaciones-casos {
+      position: relative;
+    }
+
+    .casos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+    }
+
+    .caso-card {
+      background: rgba(30, 30, 30, 0.8);
+      border-radius: 0px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      transform-origin: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .caso-card:hover {
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      transform: translateY(-12px);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(40, 40, 40, 0.95);
+    }
+
+    .caso-imagen {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+      background: #1a1a1a;
+    }
+
+    .caso-imagen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .caso-card:hover .caso-imagen img {
+      transform: scale(1.08);
+    }
+
+    .caso-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .caso-card:hover .caso-overlay {
+      opacity: 1;
+    }
+
+    .caso-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000000;
+      padding: 6px 14px;
+      border-radius: 0px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.4s ease;
+    }
+
+    .caso-card:hover .caso-badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .caso-info {
+      padding: 28px 24px;
+      background: rgba(30, 30, 30, 0.8);
+      transition: background 0.4s ease;
+    }
+
+    .caso-card:hover .caso-info {
+      background: rgba(40, 40, 40, 0.95);
+    }
+
+    .caso-titulo {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    .caso-line {
+      width: 30px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent);
+      margin: 12px 0;
+    }
+
+    .caso-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #b0b0b0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    @media (max-width: 1024px) {
+      .aplicaciones-header {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .aplicaciones-panorama {
+        height: 240px;
+      }
+      .aplicaciones-content {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+      .aplicaciones-usos {
+        position: static;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .aplicaciones-cnc-section {
+        padding: 60px 5%;
+      }
+      .aplicaciones-h3 {
+        font-size: 1.6rem;
+      }
+      .aplicaciones-desc {
+        font-size: 1rem;
+      }
+      .aplicaciones-panorama {
+        height: 200px;
+      }
+      .casos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .caso-imagen {
+        height: 200px;
+      }
+      .caso-info {
+        padding: 20px 18px;
+      }
+      .aplicaciones-h4,
+      .aplicaciones-h5 {
+        font-size: 1rem;
+      }
+      .usos-lista {
+        gap: 12px;
+      }
+      .uso-item {
+        padding: 14px 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .aplicaciones-cnc-section {
+        padding: 50px 5%;
+      }
+      .aplicaciones-h3 {
+        font-size: 1.4rem;
+      }
+      .aplicaciones-header {
+        gap: 25px;
+      }
+      .aplicaciones-panorama {
+        height: 160px;
+      }
+      .aplicaciones-desc {
+        font-size: 0.95rem;
+      }
+      .caso-imagen {
+        height: 180px;
+      }
+      .caso-titulo {
+        font-size: 0.95rem;
+      }
+      .caso-desc {
+        font-size: 0.85rem;
+      }
+      .uso-item p {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* === SECCIÓN 5 - COMPROMISO === */
+    .compromiso-cnc-section {
+      background: #000000;
+      padding: 100px 6%;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .compromiso-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #f5f5f5;
+      position: relative;
+      z-index: 2;
+    }
+
+    .compromiso-h3,
+    .compromiso-h4,
+    .compromiso-h5 {
+      font-family: "Helvetica Neue", sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    .compromiso-header {
+      margin-bottom: 80px;
+      position: relative;
+      padding-left: 20px;
+      max-width: 850px;
+    }
+
+    .compromiso-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 60px;
+      background: linear-gradient(to bottom, #ffffff, rgba(255,255,255,0.3));
+    }
+
+    .compromiso-h3 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 25px 0;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+
+    .compromiso-desc {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .compromiso-content {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .compromiso-valor {
+      position: relative;
+    }
+
+    .compromiso-h4,
+    .compromiso-h5 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0 0 35px 0;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+    }
+
+    .valor-items {
+      display: flex !important;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .valor-card {
+      display: flex !important;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 22px 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border-left: 3px solid rgba(255,255,255,0.3);
+      border-radius: 0px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .valor-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .valor-card:hover::before {
+      left: 100%;
+    }
+
+    .valor-card:hover {
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+      border-left-color: rgba(255,255,255,0.6);
+      transform: translateX(12px);
+      box-shadow: 0 15px 40px rgba(255,255,255,0.08);
+    }
+
+    .valor-icon {
+      font-size: 1.4rem;
+      color: #ffffff;
+      font-weight: 700;
+      min-width: 24px;
+      opacity: 0.7;
+      transition: all 0.4s ease;
+    }
+
+    .valor-card:hover .valor-icon {
+      opacity: 1;
+      color: #ffffff;
+      transform: scale(1.3);
+    }
+
+    .valor-card p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 500;
+    }
+
+    .valor-card:hover p {
+      color: #ffffff;
+    }
+
+    .compromiso-garantia {
+      position: relative;
+    }
+
+    .garantia-items {
+      display: grid !important;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .garantia-badge {
+      display: flex !important;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 32px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 0px;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .garantia-badge::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .garantia-badge:hover {
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+      border-color: rgba(255,255,255,0.4);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .garantia-badge:hover::before {
+      opacity: 1;
+    }
+
+    .garantia-numero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      min-width: 60px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 0px;
+      transition: all 0.5s ease;
+    }
+
+    .garantia-badge:hover .garantia-numero {
+      background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12));
+      border-color: rgba(255,255,255,0.6);
+      transform: scale(1.1);
+    }
+
+    .garantia-badge p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 500;
+    }
+
+    .garantia-badge:hover p {
+      color: #ffffff;
+    }
+
+    .compromiso-decoracion {
+      position: absolute;
+      top: 0;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .compromiso-cnc-section {
+        padding: 80px 5%;
+      }
+      .compromiso-content {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+      .compromiso-h3 {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .compromiso-cnc-section {
+        padding: 60px 5%;
+      }
+      .compromiso-h3 {
+        font-size: 1.6rem;
+      }
+      .compromiso-desc {
+        font-size: 1rem;
+      }
+      .compromiso-h4,
+      .compromiso-h5 {
+        font-size: 1.1rem;
+        margin-bottom: 25px;
+      }
+      .valor-card,
+      .garantia-badge {
+        padding: 20px 20px;
+      }
+      .valor-items {
+        gap: 14px;
+      }
+      .garantia-items {
+        gap: 16px;
+      }
+      .garantia-numero {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        font-size: 1.4rem;
+      }
+      .compromiso-decoracion {
+        width: 300px;
+        height: 300px;
+        right: -20%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .compromiso-cnc-section {
+        padding: 50px 5%;
+      }
+      .compromiso-header {
+        margin-bottom: 60px;
+      }
+      .compromiso-h3 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+      }
+      .compromiso-desc {
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+      .valor-card,
+      .garantia-badge {
+        padding: 18px 16px;
+        gap: 12px;
+      }
+      .valor-icon {
+        font-size: 1.2rem;
+      }
+      .garantia-numero {
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        font-size: 1.2rem;
+      }
+      .valor-card p,
+      .garantia-badge p {
+        font-size: 0.9rem;
+      }
+      .compromiso-decoracion {
+        width: 200px;
+        height: 200px;
+        right: -15%;
+      }
+    }
+
+    /* === SECCIÓN 6 - FAQ === */
+    .faq-cnc-section {
+      background: #ffffff;
+      padding: 100px 6%;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .faq-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #1e1e1e;
+    }
+
+    .faq-h3 {
+      font-family: "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #0e0e0e;
+    }
+
+    .faq-header {
+      margin-bottom: 80px;
+      position: relative;
+      padding-left: 20px;
+      max-width: 900px;
+    }
+
+    .faq-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 60px;
+      background: linear-gradient(to bottom, #0e0e0e, rgba(14,14,14,0.3));
+    }
+
+    .faq-header h3 {
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .faq-content {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .faq-accordion {
+      display: flex !important;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      border: 1px solid #e0e0e0;
+      background: #ffffff;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .faq-item:hover {
+      border-color: #d0d0d0;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+    }
+
+    .faq-item:hover .faq-answer {
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    .faq-item:hover .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 24px 28px;
+      background: #ffffff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      font-family: "Helvetica Neue", sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0e0e0e;
+      text-align: left;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .faq-question:hover {
+      color: #0e0e0e;
+      background: rgba(245,245,245,0.5);
+    }
+
+    .faq-question span {
+      flex: 1;
+    }
+
+    .faq-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: #333;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    .faq-answer p {
+      padding: 0 28px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #555;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .faq-answer ol,
+    .faq-answer ul {
+      padding-left: 60px;
+      margin: 0;
+      list-style-position: outside;
+      padding-bottom: 20px;
+    }
+
+    .faq-answer li {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 12px;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .faq-answer ol li {
+      list-style: decimal;
+    }
+
+    .faq-answer ul li {
+      list-style: disc;
+    }
+
+    .faq-subheading {
+      padding: 0 28px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0e0e0e;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 15px;
+      margin-top: 8px;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    .faq-image-space {
+      position: sticky;
+      top: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+    }
+
+    .faq-image-placeholder {
+      width: 100%;
+      height: 500px;
+      background: linear-gradient(135deg, #f9f9f9 0%, #f3f3f3 100%);
+      border: 2px dashed #d0d0d0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-radius: 0px;
+      transition: all 0.3s ease;
+    }
+
+    .faq-image-space:hover .faq-image-placeholder {
+      border-color: #999;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+    }
+
+    .faq-image-placeholder p {
+      font-size: 1.1rem;
+      color: #666;
+      margin: 0 0 10px 0;
+      font-weight: 600;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    .faq-image-note {
+      font-size: 0.85rem !important;
+      color: #999;
+      font-weight: 400 !important;
+    }
+
+    @media (max-width: 1024px) {
+      .faq-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+      .faq-image-space {
+        position: static;
+        min-height: 400px;
+      }
+      .faq-image-placeholder {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .faq-cnc-section {
+        padding: 70px 5%;
+      }
+      .faq-h3 {
+        font-size: 1.6rem;
+      }
+      .faq-header {
+        margin-bottom: 60px;
+        padding-left: 18px;
+      }
+      .faq-question {
+        padding: 20px 24px;
+        font-size: 0.95rem;
+      }
+      .faq-answer p,
+      .faq-answer li {
+        font-size: 0.9rem;
+      }
+      .faq-subheading {
+        padding: 0 24px;
+        font-size: 0.85rem;
+      }
+      .faq-answer ol,
+      .faq-answer ul {
+        padding-left: 50px;
+      }
+      .faq-image-placeholder {
+        height: 300px;
+      }
+      .faq-image-placeholder p {
+        font-size: 1rem;
+      }
+      .faq-image-note {
+        font-size: 0.8rem !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .faq-cnc-section {
+        padding: 60px 5%;
+      }
+      .faq-h3 {
+        font-size: 1.4rem;
+      }
+      .faq-header {
+        margin-bottom: 50px;
+      }
+      .faq-question {
+        padding: 18px 20px;
+        font-size: 0.9rem;
+      }
+      .faq-icon {
+        width: 20px;
+        height: 20px;
+      }
+      .faq-answer p,
+      .faq-answer li {
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+      .faq-answer ol,
+      .faq-answer ul {
+        padding-left: 40px;
+        font-size: 0.85rem;
+      }
+      .faq-subheading {
+        padding: 0 20px;
+        font-size: 0.8rem;
+      }
+      .faq-image-placeholder {
+        height: 250px;
+      }
+      .faq-image-placeholder p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- ===================================================
+         HERO
+    =================================================== -->
+    <section class="hero-cnc">
+      <div class="hero-cnc-inner">
+        <div class="hero-text-block fade-up">
+          <h1 class="hero-title">Corte y plegado CNC</h1>
+          <p class="hero-subtitle">Tecnología CNC para la manufactura moderna</p>
+          <p class="hero-paragraph">
+            Trabajamos tanto con materiales ferrosos como no ferrosos, en planchas de hasta 4 metros de largo
+            y 1.25 metros de ancho, alcanzando espesores que van desde 0.8&nbsp;mm hasta 3&nbsp;mm dependiendo del material.
+          </p>
+
+          <a href="#contacto" class="corte-cnc-btn white-textured">Contactar ahora</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 1 - INTRO CORTE CNC
+    =================================================== -->
+    <section class="intro-corte-cnc">
+      <div class="intro-corte-grid">
+        <div class="intro-corte-text fade-up">
+          <div class="intro-kicker">Precisión, velocidad y rendimiento</div>
+          <h2 class="intro-title">Corte CNC</h2>
+          <p class="intro-paragraph">
+            Nuestro servicio de corte CNC utiliza punzonadoras hidráulicas de 30&nbsp;toneladas,
+            capaces de ejecutar hasta 1100&nbsp;golpes por minuto, lo que permite una producción ágil
+            sin comprometer la precisión geométrica. A diferencia del corte manual o mecánico tradicional,
+            el CNC mantiene uniformidad en cada repetición y minimiza la merma de material.
+          </p>
+
+          <a href="#contacto" class="corte-cnc-btn white-textured">Contactar ahora</a>
+        </div>
+
+        <div class="intro-image fade-up delay-1">
+          <div class="intro-image-inner">
+            <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-4-1-1.webp"
+                 alt="Corte CNC AVUI - taller metálico" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         COMPLEMENTO SECCIÓN 1
+    =================================================== -->
+    <section class="corte-cnc-section">
+      <div class="corte-cnc-container">
+        <!-- TÍTULO PRINCIPAL CON IMAGEN -->
+        <div class="corte-cnc-header fade-up">
+          <div class="corte-cnc-header-flex">
+            <div class="corte-cnc-header-text">
+              <p class="corte-cnc-h3">
+                Corte CNC — Precisión, velocidad y rendimiento
+              </p>
+              <p class="corte-cnc-desc">
+                Nuestro servicio de corte CNC utiliza punzonadoras hidráulicas de
+                <strong>30 toneladas</strong>, capaces de ejecutar hasta
+                <strong>1100 golpes por minuto</strong>, lo que permite una producción ágil sin comprometer la precisión geométrica.
+                A diferencia del corte manual o mecánico tradicional, el CNC mantiene uniformidad en cada repetición y minimiza la merma de material.
+              </p>
+            </div>
+            <div class="corte-cnc-header-image fade-up delay-2">
+              <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-2.webp" alt="Corte CNC AVUI">
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOQUES EN DOS COLUMNAS -->
+        <div class="corte-cnc-flex">
+          <div class="corte-cnc-box fade-up delay-1">
+            <h4 class="corte-cnc-h4">Características técnicas del corte CNC</h4>
+            <div class="corte-cnc-content">
+              <ul class="corte-cnc-list">
+                <li><strong>Capacidad de trabajo:</strong> planchas hasta 4 m de largo por 1.25 m de ancho</li>
+                <li><strong>Espesores de trabajo:</strong> de 0.8 a 3 mm (acero, aluminio, galvanizado, cobre, latón)</li>
+                <li><strong>Repetitividad:</strong> tolerancia de décimas de milímetro</li>
+                <li><strong>Velocidad:</strong> 1100 golpes por minuto</li>
+                <li><strong>Producción:</strong> piezas unitarias o grandes volúmenes sin pérdida de exactitud</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="corte-cnc-box fade-up delay-2">
+            <h5 class="corte-cnc-h5">Beneficios directos del corte CNC</h5>
+            <div class="corte-cnc-content">
+              <ul class="corte-cnc-list">
+                <li>Ahorro de material y tiempo</li>
+                <li>Resultados uniformes y exactos</li>
+                <li>Permite perforaciones, celosías, cortes decorativos o técnicos</li>
+                <li>Integración directa con software de diseño 3D</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 2 - PLEGADO CNC
+    =================================================== -->
+    <section class="plegado-cnc-section">
+      <div class="plegado-cnc-container">
+
+        <div class="plegado-cnc-header-wrap fade-up">
+          <div class="plegado-cnc-header">
+            <h3 class="plegado-cnc-h3">
+              Plegado CNC — Control y versatilidad en cada forma
+            </h3>
+            <p class="plegado-cnc-desc">
+              El plegado CNC es la etapa en la que se da forma tridimensional a las piezas metálicas.
+              En AVUI utilizamos plegadoras hidráulicas NC con control de ejes y sistema de crowning,
+              que aseguran presión uniforme y alineación precisa en todo el largo del pliegue.
+            </p>
+          </div>
+
+          <div class="plegado-cnc-image fade-up delay-1">
+            <img src="https://avui.cl/wp-content/uploads/2025/03/MARCO_CAPANELESREMATES.4.webp" alt="Plegado CNC AVUI">
+          </div>
+        </div>
+
+        <div class="plegado-cnc-flex">
+          <div class="plegado-cnc-box fade-up delay-1">
+            <h4 class="plegado-cnc-h4">Capacidades de plegado</h4>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li><strong>Longitud máxima:</strong> 3 metros</li>
+                <li><strong>Espesores de trabajo:</strong> 0.8 a 5 mm (según material)</li>
+                <li><strong>Radio de pliegue:</strong> variable entre 1 mm y 16 mm o más</li>
+                <li><strong>Tipos de plegado:</strong> ángulo variable, cóncavo, convexo, doble y en Z</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="plegado-cnc-box fade-up delay-2">
+            <h5 class="plegado-cnc-h5">Aplicaciones del plegado CNC</h5>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Fabricación de paneles y carcasas metálicas</li>
+                <li>Gabinetes eléctricos, racks, canalizaciones y soportes</li>
+                <li>Componentes de maquinaria industrial</li>
+                <li>Mobiliario técnico y estructuras arquitectónicas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 3 - MATERIALES Y FORMATOS
+    =================================================== -->
+    <section class="materiales-cnc-section">
+      <div class="materiales-cnc-container fade-up">
+
+        <div class="materiales-cnc-header">
+          <div class="materiales-cnc-header-text">
+            <h3 class="materiales-cnc-h3">Materiales y formatos compatibles</h3>
+            <p class="materiales-cnc-desc">
+              Nuestra maquinaria CNC permite trabajar con una amplia gama de materiales,
+              adaptándose tanto a requerimientos industriales como arquitectónicos.
+            </p>
+          </div>
+        </div>
+
+        <div class="materiales-cnc-image fade-up delay-1">
+          <img src="https://avui.cl/wp-content/uploads/2023/11/FACHADA-METALICA-CELOSIAS-METALICAS-FACHADA-PARA-ARQUITECTURA-Y-CELOSIAS-ARQUITECTONICAS-PANELES-metalicos-Fachada-arquitectonica-celosias-metalicas-planchas-metalicas-fabrica-fabricante-Venta-AVUI-San.webp" 
+               alt="Paneles metálicos AVUI - formatos compatibles">
+        </div>
+
+        <div class="materiales-cnc-grid fade-up delay-2">
+          <h4 class="materiales-cnc-h4">Tipos de materiales procesables</h4>
+
+          <div class="materiales-cnc-icons">
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_14_43-p.m.-1.webp" alt="Acero al carbono">
+              </div>
+              <p>Acero al carbono</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_14_35-p.m.webp" alt="Acero inoxidable">
+              </div>
+              <p>Acero inoxidable</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_39_50-p.m.-1.webp" alt="Aluminio y compuesto">
+              </div>
+              <p>Aluminio y compuesto</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_26_52-p.m.webp" alt="Galvanizado">
+              </div>
+              <p>Galvanizado</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_25_23-p.m.webp" alt="Cobre y latón">
+              </div>
+              <p>Cobre y latón</p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="materiales-cnc-rangos fade-up delay-3">
+          <h5 class="materiales-cnc-h5">Rangos y formatos estándar</h5>
+          <ul class="materiales-cnc-list">
+            <li><strong>Espesor en aluminio:</strong> hasta 3–4 mm</li>
+            <li><strong>Espesor en acero inoxidable:</strong> 0.8–2 mm</li>
+            <li><strong>Plancha estándar:</strong> 1000 x 3000 mm</li>
+            <li><strong>Plancha extendida:</strong> hasta 1250 x 4000 mm</li>
+          </ul>
+          <p class="materiales-cnc-foot">
+            Estos márgenes nos permiten ejecutar desde proyectos ligeros y decorativos 
+            hasta estructuras funcionales de alta resistencia.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 4 - APLICACIONES
+    =================================================== -->
+    <section class="aplicaciones-cnc-section">
+      <div class="aplicaciones-cnc-container">
+        
+        <div class="aplicaciones-header fade-up">
+          <div class="aplicaciones-header-content">
+            <h3 class="aplicaciones-h3">Aplicaciones</h3>
+            <p class="aplicaciones-desc">
+              El servicio CNC es clave en múltiples industrias donde se requiere exactitud, durabilidad y estética.
+            </p>
+          </div>
+          <div class="aplicaciones-panorama fade-up delay-1">
+            <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-5.webp" alt="Aplicaciones CNC">
+            <div class="panorama-overlay"></div>
+          </div>
+        </div>
+
+        <div class="aplicaciones-content fade-up delay-2">
+          <div class="aplicaciones-usos">
+            <h4 class="aplicaciones-h4">Usos principales</h4>
+            <div class="usos-lista">
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p>Componentes estructurales para maquinaria</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p>Muebles metálicos personalizados</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p>Fachadas ventiladas y paneles arquitectónicos</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p>Gabinetes eléctricos y racks de servidores</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p>Piezas técnicas para laboratorios y hospitales</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="aplicaciones-casos">
+            <h5 class="aplicaciones-h5">Casos de aplicación</h5>
+            <div class="casos-grid">
+              
+              <div class="caso-card fade-up delay-3">
+                <div class="caso-imagen">
+                  <img src="https://avui.cl/wp-content/uploads/2023/10/Fachada-arquitectorina-11-2.webp" alt="Fachada Buen Paseo Los Dominicos">
+                  <div class="caso-overlay"></div>
+                  <div class="caso-badge">Proyecto 01</div>
+                </div>
+                <div class="caso-info">
+                  <p class="caso-titulo">Fachada Buen Paseo Los Dominicos</p>
+                  <div class="caso-line"></div>
+                  <p class="caso-desc">Diseño arquitectónico de alta precisión con paneles metálicos personalizados</p>
+                </div>
+              </div>
+
+              <div class="caso-card fade-up delay-4">
+                <div class="caso-imagen">
+                  <img src="https://avui.cl/wp-content/uploads/2025/03/BANDEJERO_SPLICE-_8.2.webp" alt="Racks y gabinetes Data Centers">
+                  <div class="caso-overlay"></div>
+                  <div class="caso-badge">Proyecto 02</div>
+                </div>
+                <div class="caso-info">
+                  <p class="caso-titulo">Racks y gabinetes de Data Centers Corporativos</p>
+                  <div class="caso-line"></div>
+                  <p class="caso-desc">Soluciones estructurales para infraestructura tecnológica de precisión industrial</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 5 - COMPROMISO AVUI
+    =================================================== -->
+    <section class="compromiso-cnc-section">
+      <div class="compromiso-cnc-container">
+
+        <div class="compromiso-header fade-up">
+          <div class="compromiso-header-content">
+            <h3 class="compromiso-h3">Compromiso AVUI — Precisión y garantía</h3>
+            <p class="compromiso-desc">
+              Nuestro servicio CNC no solo busca entregar un resultado técnico, sino también acompañar al cliente durante todo el proceso productivo. Cada pedido incluye asesoría técnica personalizada, verificación dimensional y control estético final antes del despacho.
+            </p>
+          </div>
+        </div>
+
+        <div class="compromiso-content">
+          <div class="compromiso-valor fade-up delay-1">
+            <h4 class="compromiso-h4">Valor agregado de AVUI</h4>
+            <div class="valor-items">
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>Fabricación con control completo en planta propia</p>
+              </div>
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>Comunicación directa con ingeniería</p>
+              </div>
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>Posibilidad de desarrollos especiales bajo requerimiento</p>
+              </div>
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>Producción continua o por lote</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="compromiso-garantia fade-up delay-2">
+            <h5 class="compromiso-h5">Garantía del servicio CNC</h5>
+            <div class="garantia-items">
+              <div class="garantia-badge">
+                <span class="garantia-numero">01</span>
+                <p>Exactitud verificada en 100% de las piezas</p>
+              </div>
+              <div class="garantia-badge">
+                <span class="garantia-numero">02</span>
+                <p>Reparación o sustitución inmediata ante desvíos</p>
+              </div>
+              <div class="garantia-badge">
+                <span class="garantia-numero">03</span>
+                <p>Asistencia postventa directa con nuestro equipo técnico</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="compromiso-decoracion"></div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 6 - PREGUNTAS FRECUENTES
+    =================================================== -->
+    <section class="faq-cnc-section">
+      <div class="faq-cnc-container">
+
+        <div class="faq-header fade-up">
+          <h3 class="faq-h3">Preguntas Frecuentes sobre la Integración entre Diseño, Ingeniería y CNC</h3>
+        </div>
+
+        <div class="faq-content">
+          <div class="faq-accordion fade-up delay-1">
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>¿Cómo se integran los sistemas CNC con el diseño e ingeniería 3D?</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>Nuestros sistemas CNC están completamente conectados con el área de diseño e ingeniería 3D. Cada pieza se desarrolla en software paramétrico y luego se programa directamente para corte o plegado, asegurando una compatibilidad total entre el modelo digital y el producto final.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>¿Qué información debe entregar el cliente para comenzar el proceso?</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>Para iniciar un proyecto, el cliente debe entregar planos, modelos o requerimientos técnicos. Con esta base, nuestro equipo de ingeniería adapta el diseño a un formato compatible con maquinaria CNC.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>¿Cuál es el proceso de integración entre CAD y CNC?</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-subheading">Flujo de trabajo paso a paso</div>
+                <ol class="faq-list">
+                  <li>El cliente entrega los planos o requerimientos técnicos.</li>
+                  <li>El equipo de ingeniería adapta el diseño al formato CNC.</li>
+                  <li>Se generan trayectorias optimizadas para corte y pliegue.</li>
+                  <li>Se ejecuta el proceso con supervisión técnica y control de calidad.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>¿Qué beneficios ofrece la integración CAD–CNC?</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-subheading">Ventajas principales</div>
+                <ul class="faq-list">
+                  <li>Menor margen de error en la fabricación.</li>
+                  <li>Aceleración del proceso productivo.</li>
+                  <li>Coherencia total entre diseño digital y pieza final.</li>
+                  <li>Posibilidad de modificar rápidamente el diseño según requerimientos del cliente.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>¿Se pueden realizar modificaciones durante el proceso de fabricación?</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>Sí. Gracias a la integración directa entre diseño CAD y maquinaria CNC, es posible ajustar el diseño de forma rápida sin afectar el flujo de producción.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="faq-image-space fade-up delay-2">
+            <div class="faq-image-placeholder">
+              <p>Espacio reservado para imagen</p>
+              <p class="faq-image-note">Reemplazar con imagen de dimensiones 400x500px</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
