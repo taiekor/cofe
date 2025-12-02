@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servicio de soldadura MIG, TIG y por punto - AVUI</title>
+
+  <style>
+    /* =====================================================
+       RESET BÁSICO
+    ===================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      color: #ffffff;
+      background: #000000;
+    }
+
+    /* =====================================================
+       UTILIDADES GENERALES
+    ===================================================== */
+    .page-wrapper {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(25px);
+      animation: fadeUp 0.8s ease-out forwards;
+    }
+
+    .delay-1  { animation-delay: 0.2s; }
+    .delay-2  { animation-delay: 0.4s; }
+    .delay-3  { animation-delay: 0.6s; }
+    .delay-4  { animation-delay: 0.8s; }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =====================================================
+       BOTÓN GLOBAL "CONTACTAR AHORA"
+    ===================================================== */
+    .corte-cnc-btn {
+      display: inline-block;
+      text-transform: uppercase;
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 14px 38px;
+      margin-top: 45px;
+      font-size: 0.95rem;
+      border: 1px solid rgba(255,255,255,0.25);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s ease;
+    }
+
+    /* Quitar subrayado en TODOS los estados del enlace */
+    .corte-cnc-btn,
+    .corte-cnc-btn:link,
+    .corte-cnc-btn:visited,
+    .corte-cnc-btn:hover,
+    .corte-cnc-btn:focus,
+    .corte-cnc-btn:active {
+      text-decoration: none !important;
+    }
+
+    /* Versión blanca translúcida con textura */
+    .corte-cnc-btn.white-textured {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      position: relative;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Textura ruido / pixelado */
+    .corte-cnc-btn.white-textured::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQI12NgYGAAAAAEAAHiIbwzAAAAAElFTkSuQmCC");
+      background-size: 4px 4px;
+      opacity: 0.25;
+      mix-blend-mode: overlay;
+    }
+
+    /* Brillo diagonal */
+    .corte-cnc-btn.white-textured::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -80%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: skewX(-25deg);
+      transition: all 0.6s ease;
+      opacity: 0;
+    }
+
+    .corte-cnc-btn.white-textured:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 8px 28px rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+    }
+
+    .corte-cnc-btn.white-textured:hover::before {
+      left: 100%;
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .corte-cnc-btn {
+        width: 100%;
+        text-align: center;
+        margin-top: 30px;
+        padding: 14px 0;
+      }
+    }
+
+    /* =====================================================
+       HERO - SERVICIO DE SOLDADURA
+    ===================================================== */
+    .hero-cnc {
+      position: relative;
+      width: 100%;
+      min-height: 90vh;
+      background-image: url("https://avui.cl/wp-content/uploads/2025/11/envato-labs-image-edit-29.webp");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .hero-cnc::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(0,0,0,0.85) 0%,
+        rgba(0,0,0,0.6) 40%,
+        rgba(0,0,0,0.35) 100%
+      );
+      z-index: 0;
+    }
+
+    .hero-cnc-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1400px;
+      padding: 120px 6% 120px;
+    }
+
+    .hero-text-block {
+      max-width: 720px;
+    }
+
+    .hero-title {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 3.1rem;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 22px;
+    }
+
+    .hero-paragraph {
+      font-size: 1rem;
+      line-height: 1.8;
+      max-width: 650px;
+      color: #e2e2e2;
+    }
+
+    @media (max-width: 1024px) {
+      .hero-cnc {
+        min-height: 80vh;
+      }
+      .hero-title {
+        font-size: 2.4rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-cnc {
+        align-items: flex-end;
+      }
+
+      .hero-cnc-inner {
+        padding: 90px 7% 80px;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+        text-align: left;
+      }
+
+      .hero-subtitle,
+      .hero-paragraph {
+        font-size: 0.95rem;
+        text-align: left;
+      }
+    }
+
+    /* =====================================================
+       SECCIÓN 1 - UNIONES METÁLICAS
+    ===================================================== */
+    .intro-corte-cnc {
+      background: #000000;
+      color: #ffffff;
+      padding: 90px 6%;
+      box-sizing: border-box;
+    }
+
+    .intro-corte-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .intro-corte-text {
+      max-width: 600px;
+    }
+
+    .intro-kicker {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #aaaaaa;
+      margin-bottom: 18px;
+    }
+
+    .intro-title {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .intro-paragraph {
+      font-size: 0.98rem;
+      line-height: 1.8;
+      color: #d8d8d8;
+      max-width: 520px;
+      margin-bottom: 14px;
+    }
+
+    .intro-image {
+      position: relative;
+    }
+
+    .intro-image-inner {
+      overflow: hidden;
+      border-radius: 0;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .intro-image-inner img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      transition: transform 0.9s ease;
+      filter: brightness(0.92) contrast(1.05);
+    }
+
+    .intro-image-inner:hover img {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 1024px) {
+      .intro-corte-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .intro-corte-text {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .intro-corte-cnc {
+        padding: 70px 6%;
+      }
+      .intro-title {
+        font-size: 2rem;
+      }
+      .intro-paragraph {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* =====================================================
+       SECCIÓN 2 - TIPOS DE SOLDADURA (3 RECUADROS)
+    ===================================================== */
+    .corte-cnc-section {
+      background: #000;
+      padding: 70px 6%;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .corte-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #f5f5f5;
+    }
+
+    .corte-cnc-h3,
+    .corte-cnc-h4,
+    .corte-cnc-h5 {
+      font-family: Helvetica, Arial, sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    .corte-cnc-desc,
+    .corte-cnc-list li {
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .corte-cnc-header {
+      margin-bottom: 50px;
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .corte-cnc-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 4px;
+      height: 40px;
+      background: #ffffff;
+      opacity: 0.9;
+    }
+
+    .corte-cnc-header-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .corte-cnc-header-text {
+      flex: 1 1 60%;
+    }
+
+    .corte-cnc-header-image {
+      flex: 1 1 35%;
+      text-align: right;
+    }
+
+    .corte-cnc-header-image img {
+      width: 100%;
+      max-width: none;
+      height: auto;
+      object-fit: contain;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: #111;
+    }
+
+    .corte-cnc-h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 15px;
+    }
+
+    .corte-cnc-desc {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #d9d9d9;
+      margin: 0;
+    }
+
+    .corte-cnc-flex {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .corte-cnc-box {
+      flex: 1 1 calc(33.333% - 20px);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 28px 26px 26px;
+      background: rgba(15,15,15,0.95);
+      transition: all 0.35s ease-out;
+      overflow: hidden;
+      position: relative;
+      min-width: 260px;
+    }
+
+    .corte-cnc-h4,
+    .corte-cnc-h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0;
+      color: #ffffff;
+    }
+
+    .corte-cnc-content {
+      max-height: 0;
+      opacity: 0;
+      transition: all 0.35s ease-out;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .corte-cnc-list {
+      list-style: none;
+      margin: 20px 0 0;
+      padding: 0;
+    }
+
+    .corte-cnc-list li {
+      position: relative;
+      padding-left: 16px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      color: #cfcfcf;
+    }
+
+    .corte-cnc-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 7px;
+      height: 1px;
+      background: #ffffff;
+      opacity: 0.7;
+    }
+
+    .corte-cnc-list strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .corte-cnc-flex:hover .corte-cnc-box {
+      background: rgba(35,35,35,0.97);
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .corte-cnc-flex:hover .corte-cnc-content {
+      max-height: 320px;
+      opacity: 1;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 900px) {
+      .corte-cnc-header-flex {
+        flex-direction: column;
+        text-align: center;
+      }
+      .corte-cnc-header-image img {
+        max-width: 100%;
+      }
+      .corte-cnc-flex {
+        flex-direction: column;
+      }
+      .corte-cnc-box {
+        flex: 1 1 100%;
+        padding: 22px 20px;
+      }
+      .corte-cnc-h3 {
+        font-size: 1.6rem;
+      }
+      .corte-cnc-desc {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* =====================================================
+       SECCIONES 3,4,5 - DETALLE MIG / TIG / PUNTO
+       (reutilizan estilos .plegado-cnc-*)
+    ===================================================== */
+    .plegado-cnc-section {
+      background: #ffffff;
+      padding: 80px 6%;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .plegado-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #222;
+    }
+
+    .plegado-cnc-h3,
+    .plegado-cnc-h4,
+    .plegado-cnc-h5 {
+      font-family: Helvetica, Arial, sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    .plegado-cnc-desc,
+    .plegado-cnc-list li {
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .plegado-cnc-header-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+    }
+
+    .plegado-cnc-header {
+      position: relative;
+      padding-left: 18px;
+      flex: 1 1 55%;
+    }
+
+    .plegado-cnc-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 4px;
+      height: 40px;
+      background: #777;
+      opacity: 0.9;
+    }
+
+    .plegado-cnc-h3 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 20px;
+      color: #111;
+    }
+
+    .plegado-cnc-desc {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #333;
+      margin: 0;
+    }
+
+    .plegado-cnc-image {
+      flex: 1 1 40%;
+      text-align: right;
+    }
+
+    .plegado-cnc-image img {
+      width: 100%;
+      height: auto;
+      max-width: none;
+      object-fit: contain;
+      display: block;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+
+    .plegado-cnc-flex {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .plegado-cnc-box {
+      flex: 1 1 calc(50% - 25px);
+      border: 1px solid #ccc;
+      padding: 28px 26px 26px;
+      background: #f9f9f9;
+      transition: all 0.35s ease-out;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .plegado-cnc-h4,
+    .plegado-cnc-h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0;
+      color: #555;
+    }
+
+    .plegado-cnc-content {
+      max-height: 0;
+      opacity: 0;
+      transition: all 0.35s ease-out;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .plegado-cnc-list {
+      list-style: none;
+      margin: 20px 0 0;
+      padding: 0;
+    }
+
+    .plegado-cnc-list li {
+      position: relative;
+      padding-left: 16px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .plegado-cnc-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 7px;
+      height: 1px;
+      background: #777;
+      opacity: 0.7;
+    }
+
+    .plegado-cnc-list strong {
+      color: #000;
+      font-weight: 600;
+    }
+
+    .plegado-cnc-flex:hover .plegado-cnc-box {
+      background: #f2f2f2;
+      border-color: #aaa;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .plegado-cnc-flex:hover .plegado-cnc-content {
+      max-height: 320px;
+      opacity: 1;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 900px) {
+      .plegado-cnc-header-wrap {
+        flex-direction: column;
+      }
+      .plegado-cnc-image {
+        text-align: center;
+        margin-top: 25px;
+      }
+      .plegado-cnc-image img {
+        max-width: 100%;
+      }
+      .plegado-cnc-flex {
+        flex-direction: column;
+      }
+      .plegado-cnc-box {
+        flex: 1 1 100%;
+        padding: 22px 20px;
+      }
+      .plegado-cnc-h3 {
+        font-size: 1.6rem;
+      }
+      .plegado-cnc-desc {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* === SECCIÓN 6 - MATERIALES === */
+    .materiales-cnc-section {
+      background: #ffffff;
+      padding: 90px 6%;
+      color: #1e1e1e;
+      overflow: hidden;
+    }
+
+    .materiales-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .materiales-cnc-h3 {
+      font-family: "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #0e0e0e;
+    }
+
+    .materiales-cnc-desc {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      max-width: 700px;
+      margin-top: 15px;
+      color: #444;
+    }
+
+    .materiales-cnc-image {
+      margin: 50px 0;
+      overflow: hidden;
+      border-radius: 14px;
+      position: relative;
+    }
+
+    .materiales-cnc-image img {
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      object-fit: cover;
+      transition: transform 0.8s ease;
+      filter: brightness(1.05) contrast(1.02);
+    }
+
+    .materiales-cnc-image:hover img {
+      transform: scale(1.03);
+    }
+
+    .materiales-cnc-grid {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    .materiales-cnc-h4 {
+      font-family: "Helvetica Neue", sans-serif;
+      font-weight: 600;
+      font-size: 1.2rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111;
+      margin-bottom: 18px;
+    }
+
+    .materiales-cnc-icons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 24px;
+      margin-top: 10px;
+    }
+
+    .material-card {
+      position: relative;
+      text-align: center;
+      padding: 35px 25px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(200, 200, 200, 0.3);
+      box-shadow: inset 0 1px 10px rgba(255, 255, 255, 0.3),
+                  0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.5s ease;
+      overflow: hidden;
+    }
+
+    .material-card::before {
+      content: "";
+      position: absolute;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2), transparent 60%);
+      transform: rotate(25deg);
+      transition: opacity 0.6s ease;
+      opacity: 0;
+    }
+
+    .material-card:hover::before {
+      opacity: 1;
+      animation: liquidMove 2s infinite linear;
+    }
+
+    @keyframes liquidMove {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .material-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .material-icon img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.6s ease;
+    }
+
+    .material-card:hover img {
+      transform: scale(1.15);
+    }
+
+    .material-card p {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      margin-top: 12px;
+    }
+
+    .materiales-cnc-rangos {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 14px;
+      padding: 40px 50px;
+      margin-top: 70px;
+      border: 1px solid rgba(220,220,220,0.5);
+    }
+
+    .materiales-cnc-h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .materiales-cnc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+
+    .materiales-cnc-list li {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .materiales-cnc-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 6px;
+      height: 6px;
+      background: #777;
+      border-radius: 50%;
+    }
+
+    .materiales-cnc-foot {
+      color: #444;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .materiales-cnc-h3 { font-size: 1.6rem; }
+      .materiales-cnc-desc { font-size: 1rem; }
+      .materiales-cnc-rangos { padding: 30px; }
+    }
+
+    /* === SECCIÓN 7 - APLICACIONES & CONTROL CALIDAD === */
+    .aplicaciones-cnc-section {
+      background: #000000;
+      padding: 90px 6%;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .aplicaciones-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #f5f5f5;
+    }
+
+    .aplicaciones-h3,
+    .aplicaciones-h4,
+    .aplicaciones-h5 {
+      font-family: "Helvetica Neue", sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    .aplicaciones-header {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 50px;
+      align-items: center;
+      margin-bottom: 80px;
+    }
+
+    .aplicaciones-header-content {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .aplicaciones-header-content::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 50px;
+      background: linear-gradient(to bottom, #ffffff, rgba(255,255,255,0.3));
+    }
+
+    .aplicaciones-h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 20px 0;
+      line-height: 1.3;
+      color: #ffffff;
+    }
+
+    .aplicaciones-desc {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #d0d0d0;
+      margin: 0;
+      max-width: 550px;
+    }
+
+    .aplicaciones-panorama {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0px;
+      height: 280px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    }
+
+    .aplicaciones-panorama img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .aplicaciones-panorama:hover img {
+      transform: scale(1.05);
+    }
+
+    .panorama-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 100%);
+      pointer-events: none;
+    }
+
+    .aplicaciones-content {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .aplicaciones-usos {
+      position: sticky;
+      top: 100px;
+    }
+
+    .aplicaciones-h4,
+    .aplicaciones-h5 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0 0 30px 0;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+    }
+
+    .usos-lista {
+      display: flex !important;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .uso-item {
+      display: flex !important;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border-left: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 0px;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+
+    .uso-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-left-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      transform: translateX(8px);
+    }
+
+    .uso-icon {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 700;
+      min-width: 20px;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .uso-item:hover .uso-icon {
+      opacity: 1;
+      color: #ffffff;
+      transform: scale(1.2);
+    }
+
+    .uso-item p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .uso-item:hover p {
+      color: #ffffff;
+    }
+
+    .aplicaciones-casos {
+      position: relative;
+    }
+
+    .casos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+    }
+
+    .caso-card {
+      background: rgba(30, 30, 30, 0.8);
+      border-radius: 0px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      transform-origin: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .caso-card:hover {
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      transform: translateY(-12px);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(40, 40, 40, 0.95);
+    }
+
+    .caso-imagen {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+      background: #1a1a1a;
+    }
+
+    .caso-imagen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .caso-card:hover .caso-imagen img {
+      transform: scale(1.08);
+    }
+
+    .caso-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .caso-card:hover .caso-overlay {
+      opacity: 1;
+    }
+
+    .caso-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000000;
+      padding: 6px 14px;
+      border-radius: 0px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.4s ease;
+    }
+
+    .caso-card:hover .caso-badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .caso-info {
+      padding: 28px 24px;
+      background: rgba(30, 30, 30, 0.8);
+      transition: background 0.4s ease;
+    }
+
+    .caso-card:hover .caso-info {
+      background: rgba(40, 40, 40, 0.95);
+    }
+
+    .caso-titulo {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    .caso-line {
+      width: 30px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent);
+      margin: 12px 0;
+    }
+
+    .caso-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #b0b0b0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    @media (max-width: 1024px) {
+      .aplicaciones-header {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .aplicaciones-panorama {
+        height: 240px;
+      }
+      .aplicaciones-content {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+      .aplicaciones-usos {
+        position: static;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .aplicaciones-cnc-section {
+        padding: 60px 5%;
+      }
+      .aplicaciones-h3 {
+        font-size: 1.6rem;
+      }
+      .aplicaciones-desc {
+        font-size: 1rem;
+      }
+      .aplicaciones-panorama {
+        height: 200px;
+      }
+      .casos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .caso-imagen {
+        height: 200px;
+      }
+      .caso-info {
+        padding: 20px 18px;
+      }
+      .aplicaciones-h4,
+      .aplicaciones-h5 {
+        font-size: 1rem;
+      }
+      .usos-lista {
+        gap: 12px;
+      }
+      .uso-item {
+        padding: 14px 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .aplicaciones-cnc-section {
+        padding: 50px 5%;
+      }
+      .aplicaciones-h3 {
+        font-size: 1.4rem;
+      }
+      .aplicaciones-header {
+        gap: 25px;
+      }
+      .aplicaciones-panorama {
+        height: 160px;
+      }
+      .aplicaciones-desc {
+        font-size: 0.95rem;
+      }
+      .caso-imagen {
+        height: 180px;
+      }
+      .caso-titulo {
+        font-size: 0.95rem;
+      }
+      .caso-desc {
+        font-size: 0.85rem;
+      }
+      .uso-item p {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* === SECCIÓN 8 - INTEGRACIÓN DE PROCESOS === */
+    .compromiso-cnc-section {
+      background: #000000;
+      padding: 100px 6%;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .compromiso-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #f5f5f5;
+      position: relative;
+      z-index: 2;
+    }
+
+    .compromiso-h3,
+    .compromiso-h4,
+    .compromiso-h5 {
+      font-family: "Helvetica Neue", sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    .compromiso-header {
+      margin-bottom: 80px;
+      position: relative;
+      padding-left: 20px;
+      max-width: 900px;
+    }
+
+    .compromiso-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 60px;
+      background: linear-gradient(to bottom, #ffffff, rgba(255,255,255,0.3));
+    }
+
+    .compromiso-h3 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 0 25px 0;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+
+    .compromiso-desc {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #d0d0d0;
+      margin: 0 0 12px 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .compromiso-content {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .compromiso-valor {
+      position: relative;
+    }
+
+    .compromiso-h4,
+    .compromiso-h5 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0 0 35px 0;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+    }
+
+    .valor-items {
+      display: flex !important;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .valor-card {
+      display: flex !important;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 22px 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border-left: 3px solid rgba(255,255,255,0.3);
+      border-radius: 0px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .valor-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .valor-card:hover::before {
+      left: 100%;
+    }
+
+    .valor-card:hover {
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+      border-left-color: rgba(255,255,255,0.6);
+      transform: translateX(12px);
+      box-shadow: 0 15px 40px rgba(255,255,255,0.08);
+    }
+
+    .valor-icon {
+      font-size: 1.4rem;
+      color: #ffffff;
+      font-weight: 700;
+      min-width: 24px;
+      opacity: 0.7;
+      transition: all 0.4s ease;
+    }
+
+    .valor-card:hover .valor-icon {
+      opacity: 1;
+      color: #ffffff;
+      transform: scale(1.3);
+    }
+
+    .valor-card p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 500;
+    }
+
+    .valor-card:hover p {
+      color: #ffffff;
+    }
+
+    .compromiso-garantia {
+      position: relative;
+    }
+
+    .garantia-items {
+      display: grid !important;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .garantia-badge {
+      display: flex !important;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 32px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 0px;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .garantia-badge::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .garantia-badge:hover {
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+      border-color: rgba(255,255,255,0.4);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .garantia-badge:hover::before {
+      opacity: 1;
+    }
+
+    .garantia-numero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      min-width: 60px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 0px;
+      transition: all 0.5s ease;
+    }
+
+    .garantia-badge:hover .garantia-numero {
+      background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12));
+      border-color: rgba(255,255,255,0.6);
+      transform: scale(1.1);
+    }
+
+    .garantia-badge p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d0d0d0;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 500;
+    }
+
+    .garantia-badge:hover p {
+      color: #ffffff;
+    }
+
+    .compromiso-decoracion {
+      position: absolute;
+      top: 0;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .compromiso-cnc-section {
+        padding: 80px 5%;
+      }
+      .compromiso-content {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+      .compromiso-h3 {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .compromiso-cnc-section {
+        padding: 60px 5%;
+      }
+      .compromiso-h3 {
+        font-size: 1.6rem;
+      }
+      .compromiso-desc {
+        font-size: 1rem;
+      }
+      .compromiso-h4,
+      .compromiso-h5 {
+        font-size: 1.1rem;
+        margin-bottom: 25px;
+      }
+      .valor-card,
+      .garantia-badge {
+        padding: 20px 20px;
+      }
+      .valor-items {
+        gap: 14px;
+      }
+      .garantia-items {
+        gap: 16px;
+      }
+      .garantia-numero {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        font-size: 1.4rem;
+      }
+      .compromiso-decoracion {
+        width: 300px;
+        height: 300px;
+        right: -20%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .compromiso-cnc-section {
+        padding: 50px 5%;
+      }
+      .compromiso-header {
+        margin-bottom: 60px;
+      }
+      .compromiso-h3 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+      }
+      .compromiso-desc {
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+      .valor-card,
+      .garantia-badge {
+        padding: 18px 16px;
+        gap: 12px;
+      }
+      .valor-icon {
+        font-size: 1.2rem;
+      }
+      .garantia-numero {
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        font-size: 1.2rem;
+      }
+      .valor-card p,
+      .garantia-badge p {
+        font-size: 0.9rem;
+      }
+      .compromiso-decoracion {
+        width: 200px;
+        height: 200px;
+        right: -15%;
+      }
+    }
+
+    /* === SECCIÓN 9 - SEGURIDAD & POR QUÉ ELEGIR AVUI === */
+    .faq-cnc-section {
+      background: #ffffff;
+      padding: 100px 6%;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .faq-cnc-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #1e1e1e;
+    }
+
+    .faq-h3 {
+      font-family: "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #0e0e0e;
+    }
+
+    .faq-header {
+      margin-bottom: 80px;
+      position: relative;
+      padding-left: 20px;
+      max-width: 900px;
+    }
+
+    .faq-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 60px;
+      background: linear-gradient(to bottom, #0e0e0e, rgba(14,14,14,0.3));
+    }
+
+    .faq-header h3 {
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .faq-content {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .faq-accordion {
+      display: flex !important;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      border: 1px solid #e0e0e0;
+      background: #ffffff;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .faq-item:hover {
+      border-color: #d0d0d0;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+    }
+
+    .faq-item:hover .faq-answer {
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    .faq-item:hover .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 24px 28px;
+      background: #ffffff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      font-family: "Helvetica Neue", sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0e0e0e;
+      text-align: left;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .faq-question:hover {
+      color: #0e0e0e;
+      background: rgba(245,245,245,0.5);
+    }
+
+    .faq-question span {
+      flex: 1;
+    }
+
+    .faq-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: #333;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .faq-answer p {
+      padding: 0 28px 20px 28px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #555;
+      margin: 0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .faq-answer ul {
+      padding: 0 28px 20px 44px;
+      margin: 0;
+      list-style-position: outside;
+    }
+
+    .faq-answer li {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 8px;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    .faq-image-space {
+      position: sticky;
+      top: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+    }
+
+    .faq-image-placeholder {
+      width: 100%;
+      height: 500px;
+      background: linear-gradient(135deg, #f9f9f9 0%, #f3f3f3 100%);
+      border: 2px dashed #d0d0d0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-radius: 0px;
+      transition: all 0.3s ease;
+    }
+
+    .faq-image-space:hover .faq-image-placeholder {
+      border-color: #999;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+    }
+
+    .faq-image-placeholder p {
+      font-size: 1.1rem;
+      color: #666;
+      margin: 0 0 10px 0;
+      font-weight: 600;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    .faq-image-note {
+      font-size: 0.85rem !important;
+      color: #999;
+      font-weight: 400 !important;
+    }
+
+    @media (max-width: 1024px) {
+      .faq-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+      .faq-image-space {
+        position: static;
+        min-height: 400px;
+      }
+      .faq-image-placeholder {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .faq-cnc-section {
+        padding: 70px 5%;
+      }
+      .faq-h3 {
+        font-size: 1.6rem;
+      }
+      .faq-header {
+        margin-bottom: 60px;
+        padding-left: 18px;
+      }
+      .faq-question {
+        padding: 20px 24px;
+        font-size: 0.95rem;
+      }
+      .faq-answer p,
+      .faq-answer li {
+        font-size: 0.9rem;
+      }
+      .faq-answer ul {
+        padding-left: 34px;
+      }
+      .faq-image-placeholder {
+        height: 300px;
+      }
+      .faq-image-placeholder p {
+        font-size: 1rem;
+      }
+      .faq-image-note {
+        font-size: 0.8rem !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .faq-cnc-section {
+        padding: 60px 5%;
+      }
+      .faq-h3 {
+        font-size: 1.4rem;
+      }
+      .faq-header {
+        margin-bottom: 50px;
+      }
+      .faq-question {
+        padding: 18px 20px;
+        font-size: 0.9rem;
+      }
+      .faq-icon {
+        width: 20px;
+        height: 20px;
+      }
+      .faq-answer p,
+      .faq-answer li {
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+      .faq-answer ul {
+        padding-left: 30px;
+      }
+      .faq-image-placeholder {
+        height: 250px;
+      }
+      .faq-image-placeholder p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- ===================================================
+         HERO
+    =================================================== -->
+    <section class="hero-cnc">
+      <div class="hero-cnc-inner">
+        <div class="hero-text-block fade-up">
+          <h1 class="hero-title">Servicio de soldadura MIG, TIG y por punto</h1>
+          <p class="hero-subtitle">Uniones metálicas resistentes, limpias y controladas</p>
+          <p class="hero-paragraph">
+            En AVUI realizamos soldadura MIG, TIG y por punto con estándares industriales,
+            asegurando uniones resistentes, limpias y estéticamente controladas en cada proyecto.
+          </p>
+
+          <a href="#contacto" class="corte-cnc-btn white-textured">Contactar ahora</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 1 - UNIONES METÁLICAS PRECISAS Y DURADERAS
+    =================================================== -->
+    <section class="intro-corte-cnc">
+      <div class="intro-corte-grid">
+        <div class="intro-corte-text fade-up">
+          <div class="intro-kicker">Soldadura industrial AVUI</div>
+          <h2 class="intro-title">Uniones metálicas precisas y duraderas</h2>
+          <p class="intro-paragraph">
+            Contamos con estaciones especializadas para cada tipo de proceso, personal técnico
+            certificado y un sistema de control interno que garantiza la resistencia estructural
+            y la homogeneidad visual de cada pieza fabricada.
+          </p>
+          <p class="intro-paragraph">
+            La soldadura forma parte esencial de nuestra cadena metalmecánica integral, que incluye
+            corte CNC, plegado, pintura electrostática y ensamblaje final. Esto nos permite ofrecer
+            un servicio completamente integrado, con control de calidad total desde el primer trazo
+            hasta la entrega final.
+          </p>
+
+          <a href="#contacto" class="corte-cnc-btn white-textured">Solicitar proyecto</a>
+        </div>
+
+        <div class="intro-image fade-up delay-1">
+          <div class="intro-image-inner">
+            <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-4-1-1.webp"
+                 alt="Soldadura industrial AVUI" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 2 - TIPOS DE SOLDADURA DISPONIBLES (3 BOXES)
+    =================================================== -->
+    <section class="corte-cnc-section">
+      <div class="corte-cnc-container">
+        <!-- TÍTULO PRINCIPAL CON IMAGEN -->
+        <div class="corte-cnc-header fade-up">
+          <div class="corte-cnc-header-flex">
+            <div class="corte-cnc-header-text">
+              <p class="corte-cnc-h3">
+                Tipos de soldadura disponibles en AVUI
+              </p>
+              <p class="corte-cnc-desc">
+                En nuestra planta trabajamos con <strong>soldadura MIG, TIG y por punto</strong>,
+                seleccionando el proceso adecuado según material, espesor, geometría de la pieza
+                y exigencias estéticas o estructurales.
+              </p>
+            </div>
+            <div class="corte-cnc-header-image fade-up delay-2">
+              <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-2.webp"
+                   alt="Estaciones de soldadura AVUI">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 BLOQUES: MIG, TIG, PUNTO -->
+        <div class="corte-cnc-flex">
+          <!-- MIG -->
+          <div class="corte-cnc-box fade-up delay-1">
+            <h4 class="corte-cnc-h4">Soldadura MIG (Metal Inert Gas)</h4>
+            <div class="corte-cnc-content">
+              <ul class="corte-cnc-list">
+                <li>
+                  <strong>Descripción:</strong> utiliza un gas inerte y un electrodo continuo,
+                  ideal para uniones rápidas y de alta productividad.
+                </li>
+                <li>
+                  <strong>Materiales:</strong> acero al carbono, galvanizado y aluminio.
+                </li>
+                <li>
+                  <strong>Usos habituales:</strong> estructuras metálicas, mobiliario y
+                  componentes industriales de mediano y gran formato.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- TIG -->
+          <div class="corte-cnc-box fade-up delay-2">
+            <h4 class="corte-cnc-h4">Soldadura TIG (Tungsten Inert Gas)</h4>
+            <div class="corte-cnc-content">
+              <ul class="corte-cnc-list">
+                <li>
+                  <strong>Descripción:</strong> ofrece un acabado más fino y preciso,
+                  con control detallado del baño de fusión.
+                </li>
+                <li>
+                  <strong>Materiales:</strong> acero inoxidable, aluminio y cobre.
+                </li>
+                <li>
+                  <strong>Usos habituales:</strong> mobiliario arquitectónico,
+                  laboratorios y piezas decorativas donde la estética del cordón es crítica.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- POR PUNTO -->
+          <div class="corte-cnc-box fade-up delay-3">
+            <h4 class="corte-cnc-h4">Soldadura por punto (Spot Welding)</h4>
+            <div class="corte-cnc-content">
+              <ul class="corte-cnc-list">
+                <li>
+                  <strong>Descripción:</strong> une piezas mediante presión y corriente
+                  eléctrica directa en puntos localizados.
+                </li>
+                <li>
+                  <strong>Aplicación principal:</strong> fabricación en serie de gabinetes,
+                  lockers, envolventes y mobiliario metálico.
+                </li>
+                <li>
+                  <strong>Ventaja clave:</strong> unión limpia y rápida sin aporte de material
+                  adicional.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 3 - DETALLE SOLDADURA MIG
+    =================================================== -->
+    <section class="plegado-cnc-section">
+      <div class="plegado-cnc-container">
+
+        <div class="plegado-cnc-header-wrap fade-up">
+          <div class="plegado-cnc-header">
+            <h3 class="plegado-cnc-h3">
+              Soldadura MIG — Alta velocidad y productividad
+            </h3>
+            <p class="plegado-cnc-desc">
+              La soldadura MIG utiliza un gas inerte y un electrodo continuo que permite
+              realizar uniones rápidas y de alta productividad. Este método es ideal para
+              piezas de acero al carbono, galvanizado y aluminio, siendo ampliamente
+              utilizado en estructuras, mobiliario y componentes industriales.
+            </p>
+          </div>
+
+          <div class="plegado-cnc-image fade-up delay-1">
+            <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-5.webp"
+                 alt="Soldadura MIG AVUI">
+          </div>
+        </div>
+
+        <div class="plegado-cnc-flex">
+          <!-- Ventajas MIG -->
+          <div class="plegado-cnc-box fade-up delay-1">
+            <h4 class="plegado-cnc-h4">Ventajas de la soldadura MIG</h4>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Alta velocidad de producción.</li>
+                <li>Excelente penetración y fusión del material.</li>
+                <li>Bajo nivel de deformación frente a otros procesos.</li>
+                <li>Ideal para series repetitivas y estructuras de gran tamaño.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Aplicaciones MIG -->
+          <div class="plegado-cnc-box fade-up delay-2">
+            <h5 class="plegado-cnc-h5">Aplicaciones típicas de soldadura MIG</h5>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Estructuras metálicas y bastidores de soporte.</li>
+                <li>Componentes de maquinaria industrial.</li>
+                <li>Mobiliario metálico de alto tránsito.</li>
+                <li>Envolventes, marcos y subestructuras de gran formato.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 4 - DETALLE SOLDADURA TIG
+    =================================================== -->
+    <section class="plegado-cnc-section">
+      <div class="plegado-cnc-container">
+
+        <div class="plegado-cnc-header-wrap fade-up">
+          <div class="plegado-cnc-header">
+            <h3 class="plegado-cnc-h3">
+              Soldadura TIG — Acabado fino y control térmico
+            </h3>
+            <p class="plegado-cnc-desc">
+              La soldadura TIG ofrece un acabado más fino y preciso, especialmente en acero inoxidable,
+              aluminio y cobre. Es el proceso preferido en proyectos donde la estética y la calidad del
+              cordón son determinantes, como mobiliario arquitectónico, laboratorios o piezas decorativas.
+            </p>
+          </div>
+
+          <div class="plegado-cnc-image fade-up delay-1">
+            <img src="https://avui.cl/wp-content/uploads/2025/03/MARCO_CAPANELESREMATES.4.webp"
+                 alt="Soldadura TIG AVUI">
+          </div>
+        </div>
+
+        <div class="plegado-cnc-flex">
+          <!-- Características TIG -->
+          <div class="plegado-cnc-box fade-up delay-1">
+            <h4 class="plegado-cnc-h4">Características de la soldadura TIG</h4>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Alta calidad visual del cordón.</li>
+                <li>Mayor control térmico y menor deformación.</li>
+                <li>Ideal para piezas delgadas o de geometrías complejas.</li>
+                <li>Aplicable en acero inoxidable, cobre y aleaciones especiales.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Aplicaciones TIG -->
+          <div class="plegado-cnc-box fade-up delay-2">
+            <h5 class="plegado-cnc-h5">Aplicaciones de la soldadura TIG</h5>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Mobiliario arquitectónico de alta exigencia estética.</li>
+                <li>Mesones y muebles de acero inoxidable para laboratorios.</li>
+                <li>Piezas decorativas de aluminio y cobre.</li>
+                <li>Componentes donde el acabado del cordón queda a la vista.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 5 - DETALLE SOLDADURA POR PUNTO
+    =================================================== -->
+    <section class="plegado-cnc-section">
+      <div class="plegado-cnc-container">
+
+        <div class="plegado-cnc-header-wrap fade-up">
+          <div class="plegado-cnc-header">
+            <h3 class="plegado-cnc-h3">
+              Soldadura por punto — Unión rápida y repetible
+            </h3>
+            <p class="plegado-cnc-desc">
+              La soldadura por punto une piezas mediante presión y corriente eléctrica directa.
+              Se utiliza especialmente en la fabricación en serie de gabinetes, lockers, envolventes
+              y mobiliario metálico, donde se requiere una unión limpia y rápida sin aporte de material adicional.
+            </p>
+          </div>
+
+          <div class="plegado-cnc-image fade-up delay-1">
+            <img src="https://avui.cl/wp-content/uploads/2023/10/Fachada-arquitectorina-11-2.webp"
+                 alt="Soldadura por punto AVUI">
+          </div>
+        </div>
+
+        <div class="plegado-cnc-flex">
+          <!-- Beneficios por punto -->
+          <div class="plegado-cnc-box fade-up delay-1">
+            <h4 class="plegado-cnc-h4">Beneficios de la soldadura por punto</h4>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Unión rápida sin distorsión apreciable.</li>
+                <li>Alta repetitividad en producción en serie.</li>
+                <li>Bajo costo operativo por punto de unión.</li>
+                <li>Ideal para piezas planas o ensamblajes ligeros.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Aplicaciones por punto -->
+          <div class="plegado-cnc-box fade-up delay-2">
+            <h5 class="plegado-cnc-h5">Aplicaciones de la soldadura por punto</h5>
+            <div class="plegado-cnc-content">
+              <ul class="plegado-cnc-list">
+                <li>Gabinetes y envolventes metálicos.</li>
+                <li>Lockers, casilleros y muebles de tipo industrial.</li>
+                <li>Carcasas ligeras y paneles ensamblados en serie.</li>
+                <li>Subestructuras metálicas de panelería delgada.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 6 - MATERIALES COMPATIBLES
+    =================================================== -->
+    <section class="materiales-cnc-section">
+      <div class="materiales-cnc-container fade-up">
+
+        <div class="materiales-cnc-header">
+          <div class="materiales-cnc-header-text">
+            <h3 class="materiales-cnc-h3">Materiales compatibles con nuestros procesos</h3>
+            <p class="materiales-cnc-desc">
+              Trabajamos con una amplia gama de metales, ajustando el proceso de soldadura
+              y los parámetros técnicos a cada tipo de material para asegurar uniones seguras
+              y duraderas.
+            </p>
+          </div>
+        </div>
+
+        <!-- Tipos de metales trabajados -->
+        <div class="materiales-cnc-grid fade-up delay-2">
+          <h4 class="materiales-cnc-h4">Tipos de metales trabajados</h4>
+
+          <div class="materiales-cnc-icons">
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_14_43-p.m.-1.webp" alt="Acero al carbono">
+              </div>
+              <p>Acero al carbono</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_14_35-p.m.webp" alt="Acero inoxidable">
+              </div>
+              <p>Acero inoxidable</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_39_50-p.m.-1.webp" alt="Aluminio y compuesto">
+              </div>
+              <p>Aluminio</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_26_52-p.m.webp" alt="Galvanizado">
+              </div>
+              <p>Galvanizado</p>
+            </div>
+
+            <div class="material-card">
+              <div class="material-icon">
+                <img src="https://avui.cl/wp-content/uploads/2025/11/ChatGPT-Image-18-nov-2025-09_25_23-p.m.webp" alt="Cobre y latón">
+              </div>
+              <p>Cobre y latón</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Capacidades técnicas por material -->
+        <div class="materiales-cnc-rangos fade-up delay-3">
+          <h5 class="materiales-cnc-h5">Capacidades técnicas por material</h5>
+          <ul class="materiales-cnc-list">
+            <li><strong>Espesores:</strong> desde 0.8&nbsp;mm hasta 5&nbsp;mm, según material y tipo de unión.</li>
+            <li><strong>Tamaño máximo de estructura:</strong> 4&nbsp;m de largo por 2.5&nbsp;m de alto.</li>
+            <li><strong>Tolerancia estructural:</strong> ±1&nbsp;mm en uniones MIG/TIG correctamente preparadas.</li>
+            <li><strong>Resistencia mínima garantizada:</strong> superior a 400&nbsp;MPa en acero al carbono.</li>
+          </ul>
+          <p class="materiales-cnc-foot">
+            Estos rangos permiten abordar desde mobiliario ligero hasta estructuras funcionales
+            de alta demanda mecánica, manteniendo control dimensional en cada etapa del proceso.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 7 - APLICACIONES & CONTROL DE CALIDAD
+    =================================================== -->
+    <section class="aplicaciones-cnc-section">
+      <div class="aplicaciones-cnc-container">
+        
+        <div class="aplicaciones-header fade-up">
+          <div class="aplicaciones-header-content">
+            <h3 class="aplicaciones-h3">Aplicaciones industriales y arquitectónicas</h3>
+            <p class="aplicaciones-desc">
+              Nuestra soldadura especializada está presente en proyectos de arquitectura, industria,
+              retail, oficinas, educación y laboratorios, donde se requiere una combinación de
+              precisión técnica, resistencia y calidad visual.
+            </p>
+          </div>
+          <div class="aplicaciones-panorama fade-up delay-1">
+            <img src="https://avui.cl/wp-content/uploads/2025/11/image-gen-5.webp" alt="Aplicaciones de soldadura AVUI">
+            <div class="panorama-overlay"></div>
+          </div>
+        </div>
+
+        <div class="aplicaciones-content fade-up delay-2">
+          <!-- Sectores de aplicación -->
+          <div class="aplicaciones-usos">
+            <h4 class="aplicaciones-h4">Sectores donde aplicamos soldadura especializada</h4>
+            <div class="usos-lista">
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p><strong>Arquitectura:</strong> estructuras, fachadas y mobiliario decorativo.</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p><strong>Industrial:</strong> bastidores, chasis, gabinetes y soportes mecánicos.</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p><strong>Retail y oficinas:</strong> tótems, lockers, displays y mobiliario metálico.</p>
+              </div>
+              <div class="uso-item">
+                <div class="uso-icon">—</div>
+                <p><strong>Laboratorios y educación:</strong> mesones y muebles de acero inoxidable.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proyectos representativos + Control de calidad -->
+          <div class="aplicaciones-casos">
+            <h5 class="aplicaciones-h5">Proyectos representativos y control de calidad</h5>
+            <div class="casos-grid">
+              
+              <div class="caso-card fade-up delay-3">
+                <div class="caso-imagen">
+                  <img src="https://avui.cl/wp-content/uploads/2023/10/Fachada-arquitectorina-11-2.webp"
+                       alt="Muebles y tótems para Data Centers">
+                  <div class="caso-overlay"></div>
+                  <div class="caso-badge">Proyecto 01</div>
+                </div>
+                <div class="caso-info">
+                  <p class="caso-titulo">Muebles y tótems para Data Centers</p>
+                  <div class="caso-line"></div>
+                  <p class="caso-desc">
+                    Desarrollo de mobiliario técnico y soportes metálicos con exigente
+                    desempeño estructural y estabilidad dimensional.
+                  </p>
+                </div>
+              </div>
+
+              <div class="caso-card fade-up delay-4">
+                <div class="caso-imagen">
+                  <img src="https://avui.cl/wp-content/uploads/2025/03/BANDEJERO_SPLICE-_8.2.webp"
+                       alt="Mobiliario técnico en acero inoxidable para universidades">
+                  <div class="caso-overlay"></div>
+                  <div class="caso-badge">Proyecto 02</div>
+                </div>
+                <div class="caso-info">
+                  <p class="caso-titulo">Mobiliario técnico en acero inoxidable</p>
+                  <div class="caso-line"></div>
+                  <p class="caso-desc">
+                    Mesones y estructuras para universidades y laboratorios, donde la
+                    calidad del cordón y la higiene superficial son determinantes.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bloque resumen de control de calidad -->
+            <div style="margin-top:32px;">
+              <h5 class="aplicaciones-h5">Control de calidad en cada unión</h5>
+              <p class="aplicaciones-desc" style="max-width:none;">
+                Cada pieza soldada pasa por controles visuales, dimensionales y de resistencia.
+                Aplicamos ensayos de penetración y continuidad en puntos críticos, garantizando
+                la integridad estructural del producto final.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 8 - INTEGRACIÓN CON PROCESOS METALMECÁNICOS
+    =================================================== -->
+    <section class="compromiso-cnc-section">
+      <div class="compromiso-cnc-container">
+
+        <div class="compromiso-header fade-up">
+          <div class="compromiso-header-content">
+            <h3 class="compromiso-h3">Integración con el resto de procesos metalmecánicos</h3>
+            <p class="compromiso-desc">
+              La soldadura en AVUI no es una etapa aislada: forma parte de un flujo productivo
+              completamente integrado, donde cada pieza mantiene su trazabilidad desde el diseño
+              hasta la entrega final.
+            </p>
+            <p class="compromiso-desc">
+              Una vez que el metal ha sido cortado y plegado en nuestras máquinas CNC, pasa al área
+              de soldadura con los planos digitales sincronizados, garantizando que las dimensiones,
+              ángulos y tolerancias se mantengan intactos durante todo el recorrido.
+            </p>
+          </div>
+        </div>
+
+        <div class="compromiso-content">
+          <!-- Flujo productivo integrado -->
+          <div class="compromiso-valor fade-up delay-1">
+            <h4 class="compromiso-h4">Flujo productivo integrado</h4>
+            <div class="valor-items">
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>
+                  El recorrido comienza con el corte y punzonado CNC, donde se definen las medidas
+                  con precisión digital en cada pieza.
+                </p>
+              </div>
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>
+                  Luego pasa al plegado hidráulico, que da forma tridimensional a la estructura
+                  respetando ángulos y radios definidos.
+                </p>
+              </div>
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>
+                  En el área de soldadura MIG, TIG o por punto, las piezas adquieren rigidez
+                  y coherencia estructural.
+                </p>
+              </div>
+              <div class="valor-card">
+                <div class="valor-icon">●</div>
+                <p>
+                  Finalmente se trasladan a pintura electrostática, ensamblaje y despacho,
+                  listas para instalación o integración industrial.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ventajas del sistema integrado -->
+          <div class="compromiso-garantia fade-up delay-2">
+            <h5 class="compromiso-h5">Ventajas del sistema integrado</h5>
+            <div class="garantia-items">
+              <div class="garantia-badge">
+                <span class="garantia-numero">01</span>
+                <p>
+                  Reducción de desplazamientos internos y tiempos de producción, concentrando
+                  todas las etapas en la misma planta.
+                </p>
+              </div>
+              <div class="garantia-badge">
+                <span class="garantia-numero">02</span>
+                <p>
+                  Trazabilidad total: cada soldadura responde a un diseño digital previamente
+                  validado, manteniendo la geometría original.
+                </p>
+              </div>
+              <div class="garantia-badge">
+                <span class="garantia-numero">03</span>
+                <p>
+                  Uniformidad visual y control estructural preciso, incluso en proyectos de
+                  gran volumen o alta complejidad técnica.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="compromiso-decoracion"></div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================
+         SECCIÓN 9 - SEGURIDAD, EXPERIENCIA Y POR QUÉ ELEGIR AVUI
+    =================================================== -->
+    <section class="faq-cnc-section">
+      <div class="faq-cnc-container">
+
+        <div class="faq-header fade-up">
+          <h3 class="faq-h3">Seguridad, experiencia y por qué elegir nuestro servicio</h3>
+        </div>
+
+        <div class="faq-content">
+          <div class="faq-accordion fade-up delay-1">
+
+            <!-- Estándares de operación -->
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Estándares de operación y seguridad</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  El área de soldadura es una de las más exigentes en términos técnicos y de
+                  seguridad industrial. En AVUI, cada operador está certificado y capacitado bajo
+                  normas nacionales e internacionales, dominando técnicas avanzadas de MIG, TIG
+                  y soldadura por punto.
+                </p>
+                <p>
+                  Nuestro equipo sigue procedimientos rigurosos que abarcan desde el uso de
+                  equipos de protección personal (EPP) hasta la calibración constante de los
+                  parámetros de soldadura. Cada proyecto incluye un protocolo de seguridad
+                  adaptado al tipo de material y a las dimensiones de las piezas.
+                </p>
+                <ul>
+                  <li>Control térmico de hornos y equipos de precalentamiento.</li>
+                  <li>Filtrado de gases y extracción localizada en cada estación.</li>
+                  <li>Verificación eléctrica y chequeo periódico de equipos.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Experiencia técnica -->
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Experiencia técnica del equipo AVUI</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Con más de cuatro décadas de trayectoria, nuestro equipo ha participado en
+                  proyectos de infraestructura, mobiliario urbano, laboratorios y estructuras
+                  arquitectónicas en Chile y Latinoamérica.
+                </p>
+                <p>
+                  Esta experiencia se refleja en cada detalle: cordones uniformes, acabados
+                  estéticos impecables y un enfoque técnico que prioriza la durabilidad sin
+                  sacrificar la precisión visual del producto final.
+                </p>
+              </div>
+            </div>
+
+            <!-- Por qué elegir AVUI -->
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Por qué elegir el servicio de soldadura AVUI</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  En un mercado donde muchas empresas tercerizan parte del proceso, AVUI destaca
+                  por su capacidad de ejecutar cada etapa dentro de la misma planta. Nuestra
+                  infraestructura nos permite coordinar diseño, fabricación, soldadura y acabado
+                  final sin pérdida de información ni desviaciones entre áreas.
+                </p>
+                <p>
+                  Esto se traduce en entregas más rápidas, costos controlados y una calidad que
+                  se mantiene constante desde la primera pieza hasta la última.
+                </p>
+              </div>
+            </div>
+
+            <!-- Diferencias clave -->
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Diferencias clave y enfoque de diseño</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  El servicio de soldadura de AVUI no se limita a unir metales: une diseño,
+                  ingeniería y estética en una sola ejecución. Cada proyecto se aborda de manera
+                  técnica, pero también funcional y visual.
+                </p>
+                <p>
+                  Ya sea una estructura industrial de gran formato o un mueble metálico
+                  arquitectónico, nuestras uniones reflejan precisión y carácter. La comunicación
+                  directa entre los equipos de diseño, corte, soldadura y pintura nos permite
+                  adaptar cada solución al contexto real del cliente, optimizando tiempo,
+                  materiales y desempeño.
+                </p>
+              </div>
+            </div>
+
+            <!-- Compromiso con la calidad -->
+            <div class="faq-item">
+              <button class="faq-question">
+                <span>Compromiso con la calidad de cada entrega</span>
+                <div class="faq-icon">+</div>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  En AVUI garantizamos soldaduras resistentes, limpias y certificadas, realizadas
+                  con equipos de última generación y verificadas bajo protocolos internos de
+                  control dimensional.
+                </p>
+                <p>
+                  Cada entrega representa nuestra promesa de calidad industrial: productos que no
+                  solo cumplen normas, sino que superan las expectativas técnicas y estéticas de
+                  nuestros clientes.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="faq-image-space fade-up delay-2">
+            <div class="faq-image-placeholder">
+              <p>Espacio reservado para imagen del área de soldadura</p>
+              <p class="faq-image-note">Reemplazar con imagen de dimensiones aproximadas 400x500px</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
