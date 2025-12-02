@@ -58,6 +58,29 @@
       animation: fadeUp 0.85s ease-out forwards;
     }
 
+    /* Accesibilidad: salto directo al contenido */
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 18px;
+      background: #ffffff;
+      color: #000;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      opacity: 0;
+    }
+
+    .skip-link:focus {
+      left: 22px;
+      transform: translateY(0);
+      opacity: 1;
+    }
+
     .delay-1  { animation-delay: 0.2s; }
     .delay-2  { animation-delay: 0.4s; }
     .delay-3  { animation-delay: 0.6s; }
@@ -67,6 +90,17 @@
       to {
         opacity: 1;
         transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
       }
     }
 
@@ -2134,8 +2168,11 @@
     }
   </style>
 </head>
-<body>
-  <div class="page-wrapper">
+  <body>
+    <a class="skip-link" href="#contenido-principal">Saltar al contenido principal</a>
+    <div class="page-wrapper">
+
+      <main id="contenido-principal">
 
     <!-- ===================================================
          HERO
@@ -2660,7 +2697,8 @@
 
       </div>
     </section>
+      </main>
 
-  </div>
-</body>
+    </div>
+  </body>
 </html>
