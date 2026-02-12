@@ -210,6 +210,15 @@ final class QRL_Quote_Requests_Lite_Fixed {
    * ========================= */
   public static function disable_ajax_add_to_cart() {
     wp_dequeue_script('wc-add-to-cart');
+
+    // En la página de cotización, desactivar TODOS los scripts de carrito de WC.
+    // wc-cart intercepta clicks en links con clase "remove" vía e.preventDefault()
+    // y envía un AJAX a /cart/ — esto impedía que nuestros links de eliminación
+    // funcionaran como navegación normal.
+    if (self::is_quote_page()) {
+      wp_dequeue_script('wc-cart');
+      wp_dequeue_script('wc-cart-fragments');
+    }
   }
 
   /* =========================
@@ -428,6 +437,33 @@ final class QRL_Quote_Requests_Lite_Fixed {
       .qrl-quote-buttons a {
         margin-right: 10px;
       }
+      .qrl-quote-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+      }
+      .qrl-quote-table th,
+      .qrl-quote-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+      }
+      .qrl-quote-table thead th {
+        background: #f9fafb;
+        font-weight: 600;
+      }
+      .qrl-quote-table tr:hover {
+        background: #f5f5f5;
+      }
+      .qrl-remove-item {
+        color: #cc0000;
+        font-size: 18px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .qrl-remove-item:hover {
+        color: #ff0000;
+      }
       .qrl-empty-quote {
         text-align: center;
         padding: 40px 20px;
@@ -491,12 +527,12 @@ final class QRL_Quote_Requests_Lite_Fixed {
       <div class="qrl-quote-page">
         <h2>Your Quotation</h2>
 
-        <table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents">
+        <table class="qrl-quote-table" style="width:100%;border-collapse:collapse;">
           <thead>
             <tr>
-              <th class="product-remove">&nbsp;</th>
-              <th class="product-name">Product</th>
-              <th class="product-sku">SKU</th>
+              <th>&nbsp;</th>
+              <th style="text-align:left;">Product</th>
+              <th style="text-align:left;">SKU</th>
             </tr>
           </thead>
           <tbody>
@@ -515,14 +551,15 @@ final class QRL_Quote_Requests_Lite_Fixed {
                 'qrl_nonce'
               );
               ?>
-              <tr class="woocommerce-cart-form__cart-item cart_item">
-                <td class="product-remove">
+              <tr>
+                <td style="width:40px;text-align:center;">
                   <a href="<?php echo esc_url($remove_url); ?>"
-                     class="remove"
-                     aria-label="<?php esc_attr_e('Remove this item', 'woocommerce'); ?>"
-                     data-product_id="<?php echo esc_attr($_product->get_id()); ?>">&times;</a>
+                     class="qrl-remove-item"
+                     aria-label="Remove this item"
+                     data-product_id="<?php echo esc_attr($_product->get_id()); ?>"
+                     style="color:#cc0000;font-size:18px;text-decoration:none;font-weight:bold;">&times;</a>
                 </td>
-                <td class="product-name" data-title="Product">
+                <td>
                   <?php
                   if ($product_permalink) {
                     echo '<a href="' . esc_url($product_permalink) . '">' . esc_html($product_name) . '</a>';
@@ -531,7 +568,7 @@ final class QRL_Quote_Requests_Lite_Fixed {
                   }
                   ?>
                 </td>
-                <td class="product-sku" data-title="SKU">
+                <td>
                   <?php echo esc_html($product_sku); ?>
                 </td>
               </tr>
