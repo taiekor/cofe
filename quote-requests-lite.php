@@ -73,6 +73,9 @@ final class QRL_Quote_Requests_Lite_Fixed {
     // CSS personalizado
     add_action('wp_head', [__CLASS__, 'maybe_inject_css'], 999);
 
+    // Exportar CSV de cotizaciones
+    add_action('admin_init', [__CLASS__, 'handle_csv_export']);
+
     // Estilos para selector de país
     add_action('wp_head', [__CLASS__, 'add_phone_input_styles']);
   }
@@ -797,12 +800,219 @@ final class QRL_Quote_Requests_Lite_Fixed {
 
     add_submenu_page(
       'woocommerce',
-      'Quote Requests',
-      'Quote Requests',
+      'Quotes List',
+      'Quotes List',
+      'manage_options',
+      'qrl-quotes-list',
+      [__CLASS__, 'quotes_list_page']
+    );
+
+    add_submenu_page(
+      'woocommerce',
+      'Quote Settings',
+      'Quote Settings',
       'manage_options',
       'qrl-quote-requests',
       [__CLASS__, 'settings_page']
     );
+  }
+
+  /* =========================
+   * CSV Export handler
+   * ========================= */
+  public static function handle_csv_export() {
+    if (!isset($_GET['qrl_export_csv']) || $_GET['qrl_export_csv'] !== '1') return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'qrl_export_csv')) return;
+
+    $orders = wc_get_orders([
+      'status' => 'wc-quote-requested',
+      'limit'  => -1,
+      'orderby' => 'date',
+      'order'   => 'DESC',
+    ]);
+
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="quote-requests-' . date('Y-m-d') . '.csv"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    $out = fopen('php://output', 'w');
+    // BOM para Excel
+    fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    fputcsv($out, ['Name', 'Phone', 'Email', 'Location', 'Products', 'Message', 'Date']);
+
+    foreach ($orders as $order) {
+      $id    = $order->get_id();
+      $name  = get_post_meta($id, '_qrl_customer_name', true) ?: $order->get_billing_first_name();
+      $phone = get_post_meta($id, '_qrl_customer_phone', true) ?: $order->get_billing_phone();
+      $email = get_post_meta($id, '_qrl_customer_email', true) ?: $order->get_billing_email();
+      $project = get_post_meta($id, '_qrl_project_details', true) ?: '';
+      $location = self::country_from_phone($phone);
+      $date = $order->get_date_created() ? $order->get_date_created()->date('Y-m-d H:i') : '';
+
+      $products = [];
+      foreach ($order->get_items() as $item) {
+        $p = $item->get_product();
+        $sku = ($p && $p->get_sku()) ? ' [' . $p->get_sku() . ']' : '';
+        $products[] = $item->get_name() . $sku;
+      }
+
+      fputcsv($out, [
+        $name,
+        $phone,
+        $email,
+        $location,
+        implode(', ', $products),
+        $project,
+        $date,
+      ]);
+    }
+
+    fclose($out);
+    exit;
+  }
+
+  /* =========================
+   * Quotes List admin page
+   * ========================= */
+  public static function quotes_list_page() {
+    if (!current_user_can('manage_options')) return;
+
+    $paged = isset($_GET['paged']) ? max(1, (int)$_GET['paged']) : 1;
+    $per_page = 20;
+
+    $orders = wc_get_orders([
+      'status'  => 'wc-quote-requested',
+      'limit'   => $per_page,
+      'offset'  => ($paged - 1) * $per_page,
+      'orderby' => 'date',
+      'order'   => 'DESC',
+    ]);
+
+    $total_query = wc_get_orders([
+      'status' => 'wc-quote-requested',
+      'limit'  => -1,
+      'return' => 'ids',
+    ]);
+    $total = count($total_query);
+    $total_pages = ceil($total / $per_page);
+
+    $export_url = wp_nonce_url(admin_url('admin.php?page=qrl-quotes-list&qrl_export_csv=1'), 'qrl_export_csv');
+
+    ?>
+    <div class="wrap">
+      <h1 style="display:flex;align-items:center;gap:15px;">
+        Quote Requests
+        <span style="background:#f0f0f1;padding:2px 10px;border-radius:12px;font-size:14px;font-weight:normal;color:#50575e;">
+          <?php echo (int)$total; ?> total
+        </span>
+        <a href="<?php echo esc_url($export_url); ?>" class="page-title-action" style="margin-left:auto;">
+          Download CSV
+        </a>
+      </h1>
+
+      <?php if (empty($orders)): ?>
+        <div style="text-align:center;padding:60px 20px;background:#fff;border:1px solid #c3c4c7;border-radius:4px;margin-top:20px;">
+          <p style="font-size:16px;color:#646970;">No quote requests received yet.</p>
+        </div>
+      <?php else: ?>
+        <table class="wp-list-table widefat fixed striped" style="margin-top:15px;">
+          <thead>
+            <tr>
+              <th style="width:60px;">#</th>
+              <th style="width:130px;">Date</th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th style="width:130px;">Location</th>
+              <th>Products</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($orders as $order):
+              $id      = $order->get_id();
+              $name    = get_post_meta($id, '_qrl_customer_name', true) ?: $order->get_billing_first_name();
+              $email   = get_post_meta($id, '_qrl_customer_email', true) ?: $order->get_billing_email();
+              $phone   = get_post_meta($id, '_qrl_customer_phone', true) ?: $order->get_billing_phone();
+              $project = get_post_meta($id, '_qrl_project_details', true) ?: '';
+              $location = self::country_from_phone($phone);
+              $date    = $order->get_date_created() ? $order->get_date_created()->date('M j, Y · H:i') : '—';
+              $edit_url = get_edit_post_link($id, '');
+
+              $items = [];
+              foreach ($order->get_items() as $item) {
+                $p = $item->get_product();
+                $sku = ($p && $p->get_sku()) ? ' <span style="color:#8c8f94;font-size:12px;">[' . esc_html($p->get_sku()) . ']</span>' : '';
+                $items[] = esc_html($item->get_name()) . $sku;
+              }
+            ?>
+            <tr>
+              <td>
+                <?php if ($edit_url): ?>
+                  <a href="<?php echo esc_url($edit_url); ?>" title="View order"><strong><?php echo (int)$id; ?></strong></a>
+                <?php else: ?>
+                  <strong><?php echo (int)$id; ?></strong>
+                <?php endif; ?>
+              </td>
+              <td style="color:#50575e;font-size:13px;"><?php echo esc_html($date); ?></td>
+              <td>
+                <strong><?php echo esc_html($name); ?></strong><br>
+                <a href="mailto:<?php echo esc_attr($email); ?>" style="font-size:13px;color:#2271b1;"><?php echo esc_html($email); ?></a>
+              </td>
+              <td style="font-size:13px;"><?php echo esc_html($phone); ?></td>
+              <td>
+                <span style="background:#f0f6fc;color:#2271b1;padding:3px 8px;border-radius:10px;font-size:12px;white-space:nowrap;">
+                  <?php echo esc_html($location); ?>
+                </span>
+              </td>
+              <td style="font-size:13px;">
+                <?php echo implode('<br>', $items); ?>
+              </td>
+              <td style="font-size:13px;color:#646970;max-width:200px;">
+                <?php
+                if ($project) {
+                  echo esc_html(mb_strlen($project) > 100 ? mb_substr($project, 0, 100) . '...' : $project);
+                } else {
+                  echo '<em style="color:#a7aaad;">—</em>';
+                }
+                ?>
+              </td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+
+        <?php if ($total_pages > 1): ?>
+          <div class="tablenav bottom" style="margin-top:10px;">
+            <div class="tablenav-pages">
+              <span class="displaying-num"><?php echo (int)$total; ?> items</span>
+              <span class="pagination-links">
+                <?php
+                $base_url = admin_url('admin.php?page=qrl-quotes-list');
+                if ($paged > 1): ?>
+                  <a class="prev-page button" href="<?php echo esc_url(add_query_arg('paged', $paged - 1, $base_url)); ?>">‹</a>
+                <?php else: ?>
+                  <span class="tablenav-pages-navspan button disabled">‹</span>
+                <?php endif; ?>
+
+                <span class="paging-input">
+                  <span class="tablenav-paging-text"><?php echo (int)$paged; ?> of <span class="total-pages"><?php echo (int)$total_pages; ?></span></span>
+                </span>
+
+                <?php if ($paged < $total_pages): ?>
+                  <a class="next-page button" href="<?php echo esc_url(add_query_arg('paged', $paged + 1, $base_url)); ?>">›</a>
+                <?php else: ?>
+                  <span class="tablenav-pages-navspan button disabled">›</span>
+                <?php endif; ?>
+              </span>
+            </div>
+          </div>
+        <?php endif; ?>
+
+      <?php endif; ?>
+    </div>
+    <?php
   }
 
   public static function register_settings() {
@@ -1201,6 +1411,86 @@ final class QRL_Quote_Requests_Lite_Fixed {
     $s = self::get_settings();
     if (empty($s['custom_css'])) return;
     echo "<style id='qrl-custom-css'>\n" . $s['custom_css'] . "\n</style>";
+  }
+
+  /* =========================
+   * Country code → Country name
+   * ========================= */
+  private static function country_from_phone($phone) {
+    $phone = trim($phone);
+    if (strpos($phone, '+') !== 0) return '—';
+
+    // Extraer solo el prefijo numérico (sin el +)
+    preg_match('/^\+(\d+)/', $phone, $m);
+    if (empty($m[1])) return '—';
+    $digits = $m[1];
+
+    // Mapa de códigos de llamada → país (más específicos primero)
+    $map = [
+      '1787' => 'Puerto Rico', '1809' => 'Dominican Republic', '1829' => 'Dominican Republic', '1849' => 'Dominican Republic',
+      '1' => 'USA/Canada',
+      '20' => 'Egypt', '27' => 'South Africa',
+      '30' => 'Greece', '31' => 'Netherlands', '32' => 'Belgium', '33' => 'France', '34' => 'Spain',
+      '36' => 'Hungary', '39' => 'Italy',
+      '40' => 'Romania', '41' => 'Switzerland', '43' => 'Austria', '44' => 'United Kingdom',
+      '45' => 'Denmark', '46' => 'Sweden', '47' => 'Norway', '48' => 'Poland', '49' => 'Germany',
+      '51' => 'Peru', '52' => 'Mexico', '53' => 'Cuba', '54' => 'Argentina', '55' => 'Brazil',
+      '56' => 'Chile', '57' => 'Colombia', '58' => 'Venezuela',
+      '60' => 'Malaysia', '61' => 'Australia', '62' => 'Indonesia', '63' => 'Philippines',
+      '64' => 'New Zealand', '65' => 'Singapore', '66' => 'Thailand',
+      '81' => 'Japan', '82' => 'South Korea', '84' => 'Vietnam', '86' => 'China',
+      '90' => 'Turkey', '91' => 'India', '92' => 'Pakistan', '93' => 'Afghanistan',
+      '94' => 'Sri Lanka', '95' => 'Myanmar', '98' => 'Iran',
+      '212' => 'Morocco', '213' => 'Algeria', '216' => 'Tunisia', '218' => 'Libya',
+      '220' => 'Gambia', '221' => 'Senegal', '223' => 'Mali', '224' => 'Guinea',
+      '225' => 'Ivory Coast', '226' => 'Burkina Faso', '227' => 'Niger', '228' => 'Togo',
+      '229' => 'Benin', '230' => 'Mauritius', '231' => 'Liberia', '233' => 'Ghana',
+      '234' => 'Nigeria', '237' => 'Cameroon', '238' => 'Cape Verde',
+      '240' => 'Equatorial Guinea', '241' => 'Gabon', '242' => 'Republic of the Congo',
+      '243' => 'DR Congo', '244' => 'Angola', '245' => 'Guinea-Bissau',
+      '248' => 'Seychelles', '249' => 'Sudan', '250' => 'Rwanda', '251' => 'Ethiopia',
+      '252' => 'Somalia', '253' => 'Djibouti', '254' => 'Kenya', '255' => 'Tanzania',
+      '256' => 'Uganda', '257' => 'Burundi', '258' => 'Mozambique', '260' => 'Zambia',
+      '261' => 'Madagascar', '262' => 'Reunion', '263' => 'Zimbabwe', '264' => 'Namibia',
+      '265' => 'Malawi', '266' => 'Lesotho', '267' => 'Botswana', '268' => 'Eswatini',
+      '269' => 'Comoros',
+      '291' => 'Eritrea', '297' => 'Aruba', '298' => 'Faroe Islands', '299' => 'Greenland',
+      '350' => 'Gibraltar', '351' => 'Portugal', '352' => 'Luxembourg', '353' => 'Ireland',
+      '354' => 'Iceland', '355' => 'Albania', '356' => 'Malta', '357' => 'Cyprus',
+      '358' => 'Finland', '359' => 'Bulgaria',
+      '370' => 'Lithuania', '371' => 'Latvia', '372' => 'Estonia', '373' => 'Moldova',
+      '374' => 'Armenia', '375' => 'Belarus', '376' => 'Andorra', '377' => 'Monaco',
+      '378' => 'San Marino', '380' => 'Ukraine', '381' => 'Serbia', '382' => 'Montenegro',
+      '383' => 'Kosovo', '385' => 'Croatia', '386' => 'Slovenia', '387' => 'Bosnia and Herzegovina',
+      '389' => 'North Macedonia',
+      '420' => 'Czech Republic', '421' => 'Slovakia',
+      '500' => 'Falkland Islands', '501' => 'Belize', '502' => 'Guatemala', '503' => 'El Salvador',
+      '504' => 'Honduras', '505' => 'Nicaragua', '506' => 'Costa Rica', '507' => 'Panama',
+      '509' => 'Haiti',
+      '520' => 'Mexico', '521' => 'Mexico',
+      '591' => 'Bolivia', '592' => 'Guyana', '593' => 'Ecuador', '594' => 'French Guiana',
+      '595' => 'Paraguay', '596' => 'Martinique', '597' => 'Suriname', '598' => 'Uruguay',
+      '599' => 'Curacao',
+      '670' => 'East Timor', '672' => 'Norfolk Island', '673' => 'Brunei',
+      '674' => 'Nauru', '675' => 'Papua New Guinea', '676' => 'Tonga', '677' => 'Solomon Islands',
+      '678' => 'Vanuatu', '679' => 'Fiji', '680' => 'Palau',
+      '852' => 'Hong Kong', '853' => 'Macau', '855' => 'Cambodia', '856' => 'Laos',
+      '880' => 'Bangladesh', '886' => 'Taiwan',
+      '960' => 'Maldives', '961' => 'Lebanon', '962' => 'Jordan', '963' => 'Syria',
+      '964' => 'Iraq', '965' => 'Kuwait', '966' => 'Saudi Arabia', '967' => 'Yemen',
+      '968' => 'Oman', '970' => 'Palestine', '971' => 'UAE', '972' => 'Israel',
+      '973' => 'Bahrain', '974' => 'Qatar', '975' => 'Bhutan', '976' => 'Mongolia',
+      '977' => 'Nepal', '992' => 'Tajikistan', '993' => 'Turkmenistan',
+      '994' => 'Azerbaijan', '995' => 'Georgia', '996' => 'Kyrgyzstan', '998' => 'Uzbekistan',
+    ];
+
+    // Intentar coincidir de más específico (4 dígitos) a menos (1 dígito)
+    for ($len = min(4, strlen($digits)); $len >= 1; $len--) {
+      $prefix = substr($digits, 0, $len);
+      if (isset($map[$prefix])) return $map[$prefix];
+    }
+
+    return '—';
   }
 }
 
