@@ -49,6 +49,12 @@ final class QRL_Quote_Requests_Lite_Fixed {
     // Block cart/checkout pages (redirigir a página de cotización)
     add_action('template_redirect', [__CLASS__, 'block_cart_and_checkout'], 2);
 
+    // Manejar eliminación de items directamente en la página de cotización
+    add_action('wp_loaded', [__CLASS__, 'handle_remove_item'], 10);
+
+    // Prevenir cache en página de cotización para que siempre muestre datos frescos
+    add_action('template_redirect', [__CLASS__, 'no_cache_quote_page'], 1);
+
     // Limpiar notificaciones viejas en página de cotización
     add_action('wp', [__CLASS__, 'clear_notices_on_quote_page'], 20);
 
@@ -285,6 +291,85 @@ final class QRL_Quote_Requests_Lite_Fixed {
   }
 
   /* =========================
+   * FIX: Manejar eliminación de items en la página de cotización
+   *
+   * Antes se usaba wc_get_cart_remove_url() que genera links a /cart/.
+   * El flujo era: click remove -> navegar a /cart/?remove_item=KEY ->
+   * WC procesa removal en wp_loaded -> WC redirige -> nuestro
+   * block_cart_and_checkout redirige de nuevo a /quotation/.
+   *
+   * El problema: en esta cadena de redirecciones dobles, la sesión de
+   * WooCommerce no siempre guarda los cambios del carrito correctamente.
+   * Al refrescar, la sesión vieja se restaura y el item "eliminado" reaparece.
+   *
+   * Solución: usar nuestros propios links de eliminación que apuntan
+   * directamente a /quotation/?qrl_remove_item=KEY&qrl_nonce=NONCE.
+   * Procesamos la eliminación aquí, forzamos el guardado de sesión,
+   * y redirigimos limpiamente a /quotation/.
+   * ========================= */
+  public static function handle_remove_item() {
+    if (empty($_GET['qrl_remove_item'])) return;
+    if (!function_exists('WC') || !WC()->cart) return;
+
+    $cart_item_key = sanitize_text_field(wp_unslash($_GET['qrl_remove_item']));
+
+    // Verificar nonce
+    $nonce = $_GET['qrl_nonce'] ?? '';
+    if (!wp_verify_nonce($nonce, 'qrl_remove_' . $cart_item_key)) {
+      wc_add_notice('Invalid security token. Please try again.', 'error');
+      wp_safe_redirect(self::quote_page_url());
+      exit;
+    }
+
+    // Obtener info del producto antes de eliminarlo (para el mensaje)
+    $cart_item = WC()->cart->get_cart_item($cart_item_key);
+    $product_name = '';
+    if ($cart_item && isset($cart_item['data'])) {
+      $product_name = $cart_item['data']->get_name();
+    }
+
+    // Eliminar el item del carrito
+    $removed = WC()->cart->remove_cart_item($cart_item_key);
+
+    if ($removed) {
+      // Forzar recalcular totales (esto también actualiza la sesión)
+      WC()->cart->calculate_totals();
+
+      // Forzar guardado explícito de la sesión AHORA, no esperar a shutdown
+      if (WC()->session) {
+        WC()->session->save_data();
+      }
+
+      if ($product_name) {
+        wc_add_notice(sprintf('"%s" has been removed from your quotation.', esc_html($product_name)), 'success');
+      }
+    }
+
+    // Redirigir a URL limpia (sin parámetros de eliminación)
+    wp_safe_redirect(self::quote_page_url());
+    exit;
+  }
+
+  /* =========================
+   * Prevenir cache en página de cotización
+   *
+   * Si un plugin de cache (WP Super Cache, W3 Total Cache, LiteSpeed,
+   * etc.) cachea la página de cotización, el usuario verá datos viejos
+   * del carrito. Esto previene ese problema.
+   * ========================= */
+  public static function no_cache_quote_page() {
+    if (!self::is_quote_page()) return;
+
+    // Headers estándar de no-cache
+    nocache_headers();
+
+    // Constante que respetan la mayoría de plugins de cache
+    if (!defined('DONOTCACHEPAGE')) {
+      define('DONOTCACHEPAGE', true);
+    }
+  }
+
+  /* =========================
    * Clear notices on quote page
    * ========================= */
   public static function clear_notices_on_quote_page() {
@@ -418,7 +503,12 @@ final class QRL_Quote_Requests_Lite_Fixed {
               $product_name = $_product->get_name();
               $product_sku = $_product->get_sku() ?: '—';
               $product_permalink = $_product->is_visible() ? $_product->get_permalink() : '';
-              $remove_url = wc_get_cart_remove_url($cart_item_key);
+              // URL de eliminación apunta a la MISMA página de cotización (no a /cart/)
+              $remove_url = wp_nonce_url(
+                add_query_arg('qrl_remove_item', $cart_item_key, self::quote_page_url()),
+                'qrl_remove_' . $cart_item_key,
+                'qrl_nonce'
+              );
               ?>
               <tr class="woocommerce-cart-form__cart-item cart_item">
                 <td class="product-remove">
