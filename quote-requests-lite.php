@@ -428,6 +428,52 @@ final class QRL_Quote_Requests_Lite_Fixed {
       .qrl-quote-buttons a {
         margin-right: 10px;
       }
+      .qrl-success-box {
+        text-align: center;
+        padding: 50px 30px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 2px solid #86efac;
+        border-radius: 12px;
+        margin: 30px 0;
+      }
+      .qrl-success-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        background: #22c55e;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        color: #fff;
+        font-weight: bold;
+      }
+      .qrl-success-box h2 {
+        color: #166534;
+        margin-bottom: 10px;
+        font-size: 24px;
+      }
+      .qrl-success-box p {
+        color: #15803d;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+      }
+      .qrl-success-box .button {
+        background: #22c55e;
+        color: #fff;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .qrl-success-box .button:hover {
+        background: #16a34a;
+        color: #fff;
+      }
       .qrl-empty-quote {
         text-align: center;
         padding: 40px 20px;
@@ -475,6 +521,22 @@ final class QRL_Quote_Requests_Lite_Fixed {
     $cart = WC()->cart;
 
     ob_start();
+
+    // Mostrar confirmación visual si se acaba de enviar la cotización
+    if (isset($_GET['qrl_sent']) && $_GET['qrl_sent'] === '1') {
+      ?>
+      <div class="qrl-success-box">
+        <div class="qrl-success-icon">&#10003;</div>
+        <h2>Quote Request Sent!</h2>
+        <p>Your quotation has been submitted successfully.<br>
+        We've sent a confirmation to your email. Our team will get back to you shortly.</p>
+        <a href="<?php echo esc_url($s['continue_url']); ?>" class="button">
+          <?php echo esc_html($s['continue_text']); ?>
+        </a>
+      </div>
+      <?php
+      return ob_get_clean();
+    }
 
     if ($cart->is_empty()) {
       ?>
@@ -697,8 +759,7 @@ final class QRL_Quote_Requests_Lite_Fixed {
     WC()->cart->empty_cart(true);
 
     // Redirect with success
-    wc_add_notice('Your quote request has been sent successfully! We will contact you soon.', 'success');
-    wp_redirect(self::quote_page_url());
+    wp_redirect(add_query_arg('qrl_sent', '1', self::quote_page_url()));
     exit;
   }
 
