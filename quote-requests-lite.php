@@ -73,8 +73,8 @@ final class QRL_Quote_Requests_Lite_Fixed {
     // CSS personalizado
     add_action('wp_head', [__CLASS__, 'maybe_inject_css'], 999);
 
-    // Exportar CSV de cotizaciones
-    add_action('admin_init', [__CLASS__, 'handle_csv_export']);
+    // Exportar CSV de cotizaciones (solo se ejecuta con action=qrl_export_csv)
+    add_action('admin_post_qrl_export_csv', [__CLASS__, 'handle_csv_export']);
 
     // Estilos para selector de país
     add_action('wp_head', [__CLASS__, 'add_phone_input_styles']);
@@ -797,6 +797,7 @@ final class QRL_Quote_Requests_Lite_Fixed {
    * ========================= */
   public static function admin_menu() {
     if (!current_user_can('manage_options')) return;
+    if (!class_exists('WooCommerce')) return;
 
     add_submenu_page(
       'woocommerce',
@@ -821,9 +822,9 @@ final class QRL_Quote_Requests_Lite_Fixed {
    * CSV Export handler
    * ========================= */
   public static function handle_csv_export() {
-    if (!isset($_GET['qrl_export_csv']) || $_GET['qrl_export_csv'] !== '1') return;
-    if (!current_user_can('manage_options')) return;
-    if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'qrl_export_csv')) return;
+    if (!current_user_can('manage_options')) wp_die('Unauthorized');
+    check_admin_referer('qrl_export_csv');
+    if (!function_exists('wc_get_orders')) wp_die('WooCommerce is required');
 
     $orders = wc_get_orders([
       'status' => 'wc-quote-requested',
@@ -833,7 +834,7 @@ final class QRL_Quote_Requests_Lite_Fixed {
     ]);
 
     header('Content-Type: text/csv; charset=UTF-8');
-    header('Content-Disposition: attachment; filename="quote-requests-' . date('Y-m-d') . '.csv"');
+    header('Content-Disposition: attachment; filename="quote-requests-' . gmdate('Y-m-d') . '.csv"');
     header('Pragma: no-cache');
     header('Expires: 0');
 
@@ -843,13 +844,13 @@ final class QRL_Quote_Requests_Lite_Fixed {
     fputcsv($out, ['Name', 'Phone', 'Email', 'Location', 'Products', 'Message', 'Date']);
 
     foreach ($orders as $order) {
-      $id    = $order->get_id();
-      $name  = get_post_meta($id, '_qrl_customer_name', true) ?: $order->get_billing_first_name();
-      $phone = get_post_meta($id, '_qrl_customer_phone', true) ?: $order->get_billing_phone();
-      $email = get_post_meta($id, '_qrl_customer_email', true) ?: $order->get_billing_email();
-      $project = get_post_meta($id, '_qrl_project_details', true) ?: '';
+      $name  = $order->get_meta('_qrl_customer_name') ?: $order->get_billing_first_name();
+      $phone = $order->get_meta('_qrl_customer_phone') ?: $order->get_billing_phone();
+      $email = $order->get_meta('_qrl_customer_email') ?: $order->get_billing_email();
+      $project = $order->get_meta('_qrl_project_details') ?: '';
       $location = self::country_from_phone($phone);
-      $date = $order->get_date_created() ? $order->get_date_created()->date('Y-m-d H:i') : '';
+      $date_obj = $order->get_date_created();
+      $date = $date_obj ? $date_obj->date('Y-m-d H:i') : '';
 
       $products = [];
       foreach ($order->get_items() as $item) {
@@ -879,6 +880,11 @@ final class QRL_Quote_Requests_Lite_Fixed {
   public static function quotes_list_page() {
     if (!current_user_can('manage_options')) return;
 
+    if (!function_exists('wc_get_orders')) {
+      echo '<div class="wrap"><h1>Quote Requests</h1><p>WooCommerce is required.</p></div>';
+      return;
+    }
+
     $paged = isset($_GET['paged']) ? max(1, (int)$_GET['paged']) : 1;
     $per_page = 20;
 
@@ -890,15 +896,17 @@ final class QRL_Quote_Requests_Lite_Fixed {
       'order'   => 'DESC',
     ]);
 
-    $total_query = wc_get_orders([
+    // Contar total sin cargar objetos completos
+    $count_query = new WC_Order_Query([
       'status' => 'wc-quote-requested',
-      'limit'  => -1,
-      'return' => 'ids',
+      'limit'  => 1,
+      'paginate' => true,
     ]);
-    $total = count($total_query);
-    $total_pages = ceil($total / $per_page);
+    $count_result = $count_query->get_orders();
+    $total = isset($count_result->total) ? (int)$count_result->total : 0;
+    $total_pages = $total > 0 ? (int)ceil($total / $per_page) : 0;
 
-    $export_url = wp_nonce_url(admin_url('admin.php?page=qrl-quotes-list&qrl_export_csv=1'), 'qrl_export_csv');
+    $export_url = wp_nonce_url(admin_url('admin-post.php?action=qrl_export_csv'), 'qrl_export_csv');
 
     ?>
     <div class="wrap">
@@ -932,13 +940,14 @@ final class QRL_Quote_Requests_Lite_Fixed {
           <tbody>
             <?php foreach ($orders as $order):
               $id      = $order->get_id();
-              $name    = get_post_meta($id, '_qrl_customer_name', true) ?: $order->get_billing_first_name();
-              $email   = get_post_meta($id, '_qrl_customer_email', true) ?: $order->get_billing_email();
-              $phone   = get_post_meta($id, '_qrl_customer_phone', true) ?: $order->get_billing_phone();
-              $project = get_post_meta($id, '_qrl_project_details', true) ?: '';
+              $name    = $order->get_meta('_qrl_customer_name') ?: $order->get_billing_first_name();
+              $email   = $order->get_meta('_qrl_customer_email') ?: $order->get_billing_email();
+              $phone   = $order->get_meta('_qrl_customer_phone') ?: $order->get_billing_phone();
+              $project = $order->get_meta('_qrl_project_details') ?: '';
               $location = self::country_from_phone($phone);
-              $date    = $order->get_date_created() ? $order->get_date_created()->date('M j, Y · H:i') : '—';
-              $edit_url = get_edit_post_link($id, '');
+              $date_obj = $order->get_date_created();
+              $date    = $date_obj ? $date_obj->date('M j, Y - H:i') : '-';
+              $edit_url = method_exists($order, 'get_edit_order_url') ? $order->get_edit_order_url() : '';
 
               $items = [];
               foreach ($order->get_items() as $item) {
@@ -972,9 +981,10 @@ final class QRL_Quote_Requests_Lite_Fixed {
               <td style="font-size:13px;color:#646970;max-width:200px;">
                 <?php
                 if ($project) {
-                  echo esc_html(mb_strlen($project) > 100 ? mb_substr($project, 0, 100) . '...' : $project);
+                  $display = mb_strlen($project) > 100 ? mb_substr($project, 0, 100) . '...' : $project;
+                  echo esc_html($display);
                 } else {
-                  echo '<em style="color:#a7aaad;">—</em>';
+                  echo '<em style="color:#a7aaad;">-</em>';
                 }
                 ?>
               </td>
@@ -991,19 +1001,19 @@ final class QRL_Quote_Requests_Lite_Fixed {
                 <?php
                 $base_url = admin_url('admin.php?page=qrl-quotes-list');
                 if ($paged > 1): ?>
-                  <a class="prev-page button" href="<?php echo esc_url(add_query_arg('paged', $paged - 1, $base_url)); ?>">‹</a>
+                  <a class="prev-page button" href="<?php echo esc_url(add_query_arg('paged', $paged - 1, $base_url)); ?>">&lsaquo;</a>
                 <?php else: ?>
-                  <span class="tablenav-pages-navspan button disabled">‹</span>
+                  <span class="tablenav-pages-navspan button disabled">&lsaquo;</span>
                 <?php endif; ?>
 
                 <span class="paging-input">
-                  <span class="tablenav-paging-text"><?php echo (int)$paged; ?> of <span class="total-pages"><?php echo (int)$total_pages; ?></span></span>
+                  <?php echo (int)$paged; ?> / <?php echo (int)$total_pages; ?>
                 </span>
 
                 <?php if ($paged < $total_pages): ?>
-                  <a class="next-page button" href="<?php echo esc_url(add_query_arg('paged', $paged + 1, $base_url)); ?>">›</a>
+                  <a class="next-page button" href="<?php echo esc_url(add_query_arg('paged', $paged + 1, $base_url)); ?>">&rsaquo;</a>
                 <?php else: ?>
-                  <span class="tablenav-pages-navspan button disabled">›</span>
+                  <span class="tablenav-pages-navspan button disabled">&rsaquo;</span>
                 <?php endif; ?>
               </span>
             </div>
