@@ -50,7 +50,9 @@ final class QRL_Quote_Requests_Lite_Fixed {
     add_action('template_redirect', [__CLASS__, 'block_cart_and_checkout'], 2);
 
     // Manejar eliminación de items directamente en la página de cotización
-    add_action('wp_loaded', [__CLASS__, 'handle_remove_item'], 10);
+    // Prioridad 20: WC_Cart_Session carga el carrito en wp_loaded prioridad 10.
+    // Si corremos a prioridad 10, el carrito aún está vacío y remove_cart_item() falla.
+    add_action('wp_loaded', [__CLASS__, 'handle_remove_item'], 20);
 
     // Prevenir cache en página de cotización para que siempre muestre datos frescos
     add_action('template_redirect', [__CLASS__, 'no_cache_quote_page'], 1);
@@ -320,6 +322,9 @@ final class QRL_Quote_Requests_Lite_Fixed {
       wp_safe_redirect(self::quote_page_url());
       exit;
     }
+
+    // Forzar carga del carrito desde sesión (por si aún no se ha cargado)
+    WC()->cart->get_cart();
 
     // Obtener info del producto antes de eliminarlo (para el mensaje)
     $cart_item = WC()->cart->get_cart_item($cart_item_key);
