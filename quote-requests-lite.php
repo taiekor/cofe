@@ -120,7 +120,13 @@ final class QRL_Quote_Requests_Lite_Fixed {
 
   private static function is_quote_page() {
     $id = self::quote_page_id();
-    return ($id && function_exists('is_page') && is_page($id));
+    if (!$id || !function_exists('is_page')) return false;
+    // is_page() requiere que $wp_query exista; si se llama antes
+    // de que WordPress prepare la query principal (ej. durante activación),
+    // lanzaría "Call to a member function is_page() on null".
+    global $wp_query;
+    if (!$wp_query) return false;
+    return is_page($id);
   }
 
   private static function quote_page_url() {
